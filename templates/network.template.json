@@ -742,186 +742,114 @@
         "NAT1EIP": {
             "Condition": "1AZCondition",
             "Description": "NAT 1 IP address",
-            "Value": { "Ref": "NAT1EIP" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-NAT1EIP" }
-            }
+            "Value": { "Ref": "NAT1EIP" }
         },
         "NAT2EIP": {
             "Condition": "2AZCondition",
             "Description": "NAT 2 IP address",
-            "Value": { "Ref": "NAT2EIP" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-NAT2EIP" }
-            }
+            "Value": { "Ref": "NAT2EIP" }
         },
         "NAT3EIP": {
             "Condition": "3AZCondition",
             "Description": "NAT 3 IP address",
-            "Value": { "Ref": "NAT3EIP" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-NAT3EIP" }
-            }
+            "Value": { "Ref": "NAT3EIP" }
         },
         "PrivateSubnet1CIDR": {
             "Condition": "1AZCondition",
             "Description": "Private subnet 1 CIDR in Availability Zone 1",
-            "Value": { "Ref": "PrivateSubnet1CIDR" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet1CIDR" }
-            }
+            "Value": { "Ref": "PrivateSubnet1CIDR" }
         },
         "PrivateSubnet1AID": {
             "Condition": "1AZCondition",
             "Description": "Private subnet 1 ID in Availability Zone 1",
-            "Value": { "Ref": "PrivateSubnet1" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet1ID" }
-            }
+            "Value": { "Ref": "PrivateSubnet1" }
         },
         "PrivateSubnet2CIDR": {
             "Condition": "2AZCondition",
             "Description": "Private subnet 2 CIDR in Availability Zone 2",
-            "Value": { "Ref": "PrivateSubnet2CIDR" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet2CIDR" }
-            }
+            "Value": { "Ref": "PrivateSubnet2CIDR" }
         },
         "PrivateSubnet2AID": {
             "Condition": "2AZCondition",
             "Description": "Private subnet 2 ID in Availability Zone 2",
-            "Value": { "Ref": "PrivateSubnet2" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet2ID" }
-            }
+            "Value": { "Ref": "PrivateSubnet2" }
         },
         "PrivateSubnet3CIDR": {
             "Condition": "3AZCondition",
             "Description": "Private subnet 3 CIDR in Availability Zone 3",
-            "Value": { "Ref": "PrivateSubnet3CIDR" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet3CIDR" }
-            }
+            "Value": { "Ref": "PrivateSubnet3CIDR" }
         },
         "PrivateSubnet3AID": {
             "Condition": "3AZCondition",
             "Description": "Private subnet 3 ID in Availability Zone 3",
-            "Value": { "Ref": "PrivateSubnet3" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet3ID" }
-            }
+            "Value": { "Ref": "PrivateSubnet3" }
         },
         "PublicSubnet1CIDR": {
             "Condition": "1AZCondition",
             "Description": "Public subnet 1 CIDR in Availability Zone 1",
-            "Value": { "Ref": "PublicSubnet1CIDR" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet1CIDR" }
-            }
+            "Value": { "Ref": "PublicSubnet1CIDR" }
         },
         "PublicSubnet1AID": {
             "Condition": "1AZCondition",
             "Description": "Public subnet 1 ID in Availability Zone 1",
-            "Value": { "Ref": "PublicSubnet1" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet1ID" }
-            }
+            "Value": { "Ref": "PublicSubnet1" }
         },
         "PublicSubnet2CIDR": {
             "Condition": "2AZCondition",
             "Description": "Public subnet 2 CIDR in Availability Zone 2",
-            "Value": { "Ref": "PublicSubnet2CIDR" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet2CIDR" }
-            }
+            "Value": { "Ref": "PublicSubnet2CIDR" }
         },
         "PublicSubnet2AID": {
             "Condition": "2AZCondition",
             "Description": "Public subnet 2 ID in Availability Zone 2",
-            "Value": { "Ref": "PublicSubnet2" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet2ID" }
-            }
+            "Value": { "Ref": "PublicSubnet2" }
         },
         "PublicSubnet3CIDR": {
             "Condition": "3AZCondition",
             "Description": "Public subnet 3 CIDR in Availability Zone 3",
-            "Value": { "Ref": "PublicSubnet3CIDR" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet3CIDR" }
-            }
+            "Value": { "Ref": "PublicSubnet3CIDR" }
         },
         "PublicSubnet3AID": {
             "Condition": "3AZCondition",
             "Description": "Public subnet 3 ID in Availability Zone 3",
-            "Value": { "Ref": "PublicSubnet3" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet3ID" }
-            }
+            "Value": { "Ref": "PublicSubnet3" }
         },
         "PrivateSubnet1RouteTable": {
             "Condition": "1AZCondition",
             "Value": {
                 "Ref": "PrivateSubnet1RouteTable"
             },
-            "Description": "Private subnet 1 route table",
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PrivateSubnet1RouteTable"
-                }
-            }
+            "Description": "Private subnet 1 route table"
         },        
         "PrivateSubnet2RouteTable": {
             "Condition": "2AZCondition",
             "Value": {
                 "Ref": "PrivateSubnet2RouteTable"
             },
-            "Description": "Private subnet 2 route table",
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PrivateSubnet2RouteTable"
-                }
-            }
+            "Description": "Private subnet 2 route table"
         },         
         "PrivateSubnet3RouteTable": {
             "Condition": "3AZCondition",
             "Value": {
                 "Ref": "PrivateSubnet3RouteTable"
             },
-            "Description": "Private subnet 3 route table",
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PrivateSubnet3RouteTable"
-                }
-            }
+            "Description": "Private subnet 3 route table"
         }, 
         "PublicSubnetRouteTable": {
             "Value": { "Ref": "PublicSubnetRouteTable" },
-            "Description": "Public subnet route table",
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnetRouteTable" }
-            }
+            "Description": "Public subnet route table"
         },
         "VPCCIDR": {
             "Value": { "Ref": "VPCCIDR" },
-            "Description": "VPC CIDR",
-            "Export": {
-                "Name": {  "Fn::Sub": "${AWS::StackName}-VPCCIDR"  }
-            }
+            "Description": "VPC CIDR"
         },
         "VPCID": {
             "Value": { "Ref": "VPC"  },
-            "Description": "VPC ID",
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-VPCID" }
-            }
+            "Description": "VPC ID"
         },
         "S3VPCEndpoint": {
             "Description": "S3 VPC Endpoint",
-            "Value": { "Ref": "S3VPCEndpoint" },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-S3VPCEndpoint" }
-            }
+            "Value": { "Ref": "S3VPCEndpoint" }
         }       
     }
 }
