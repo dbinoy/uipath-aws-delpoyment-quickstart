@@ -179,8 +179,8 @@
             "Type": "String"
         },             
         "VPCCIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+            "AllowedPattern": "^([0-9]{1,3}\\.){2}([0]{1}.)[0]{1}(\\/[16]{2})$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.0.0/16",
             "Default": "10.0.0.0/16",
             "Description": "CIDR block for the VPC",
             "Type": "String"
@@ -205,28 +205,7 @@
             "Default": "",
             "Description": "Tag to add to private subnet 3 in format Key=Value (Optional)",
             "Type": "String"
-        },        
-        "PrivateSubnet1CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.0.0/19",
-            "Description": "CIDR block for private subnet 1 located in Availability Zone 1",
-            "Type": "String"
-        },
-        "PrivateSubnet2CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.32.0/19",
-            "Description": "CIDR block for private subnet 2 located in Availability Zone 2",
-            "Type": "String"
-        },
-        "PrivateSubnet3CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.64.0/19",
-            "Description": "CIDR block for private subnet 3 located in Availability Zone 3",
-            "Type": "String"
-        },     
+        },            
         "PublicSubnetTag1": {
             "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
             "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
@@ -247,28 +226,7 @@
             "Default": "",
             "Description": "Tag to add to public subnet 3 in format Key=Value (Optional)",
             "Type": "String"
-        },           
-        "PublicSubnet1CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.128.0/20",
-            "Description": "CIDR block for the public (DMZ) subnet 1 located in Availability Zone 1",
-            "Type": "String"
-        },
-        "PublicSubnet2CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.144.0/20",
-            "Description": "CIDR block for the public (DMZ) subnet 2 located in Availability Zone 2",
-            "Type": "String"
-        },
-        "PublicSubnet3CIDR": {
-            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
-            "Default": "10.0.160.0/20",
-            "Description": "CIDR block for the public (DMZ) subnet 3 located in Availability Zone 3",
-            "Type": "String"
-        },        
+        },                  
         "SourceCodeBucket": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -285,22 +243,16 @@
         }
     },
     "Resources": {
-        "VPCStack": {
+        "NetworkStack": {
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
                                     {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "vpc.template.json" ]]},
+                                    {"Ref": "TemplateLocation"}, "network.template.json" ]]},
                 "Parameters" : {
                     "AvailabilityZones": {"Fn::Join": ["-", {"Ref": "AvailabilityZones"} ]},
                     "NumberOfAZs": {"Ref": "NumberOfAZs"},
                     "VPCCIDR": {"Ref": "VPCCIDR"},
-                    "PublicSubnet1CIDR": {	"Ref": "PublicSubnet1CIDR"},
-                    "PublicSubnet2CIDR": {"Ref": "PublicSubnet2CIDR"},
-                    "PublicSubnet3CIDR": {"Ref": "PublicSubnet3CIDR"},
-                    "PrivateSubnet1CIDR": {	"Ref": "PrivateSubnet1CIDR"},
-                    "PrivateSubnet2CIDR": {"Ref": "PrivateSubnet2CIDR"},
-                    "PrivateSubnet3CIDR": {"Ref": "PrivateSubnet3CIDR"},
                     "PublicSubnetTag1": {	"Ref": "PublicSubnetTag1"},
                     "PublicSubnetTag2": {"Ref": "PublicSubnetTag2"},
                     "PublicSubnetTag3": {"Ref": "PublicSubnetTag3"},
@@ -309,7 +261,19 @@
                     "PrivateSubnetTag3": {"Ref": "PrivateSubnetTag3"}                                         
                 }
             }
-        }        
+        },
+        "SecurityStack": {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
+                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "TemplateLocation"}, "security.template.json" ]]},
+                "Parameters" : {
+                    "VPCID": { "Fn::GetAtt" : ["NetworkStack", "Outputs.VPCID"] },
+                    "VPCCIDR": {"Ref": "VPCCIDR"}                                        
+                }
+            }
+        }                
     },
     "Outputs": {
     }
