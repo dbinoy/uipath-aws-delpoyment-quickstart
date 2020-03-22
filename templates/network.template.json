@@ -754,66 +754,54 @@
             "Description": "NAT 3 IP address",
             "Value": { "Ref": "NAT3EIP" }
         },
-        "PrivateSubnet1CIDR": {
-            "Condition": "1AZCondition",
-            "Description": "Private subnet 1 CIDR in Availability Zone 1",
-            "Value": { "Ref": "PrivateSubnet1CIDR" }
-        },
         "PrivateSubnet1AID": {
             "Condition": "1AZCondition",
             "Description": "Private subnet 1 ID in Availability Zone 1",
             "Value": { "Ref": "PrivateSubnet1" }
-        },
-        "PrivateSubnet2CIDR": {
-            "Condition": "2AZCondition",
-            "Description": "Private subnet 2 CIDR in Availability Zone 2",
-            "Value": { "Ref": "PrivateSubnet2CIDR" }
         },
         "PrivateSubnet2AID": {
             "Condition": "2AZCondition",
             "Description": "Private subnet 2 ID in Availability Zone 2",
             "Value": { "Ref": "PrivateSubnet2" }
         },
-        "PrivateSubnet3CIDR": {
-            "Condition": "3AZCondition",
-            "Description": "Private subnet 3 CIDR in Availability Zone 3",
-            "Value": { "Ref": "PrivateSubnet3CIDR" }
-        },
         "PrivateSubnet3AID": {
             "Condition": "3AZCondition",
             "Description": "Private subnet 3 ID in Availability Zone 3",
             "Value": { "Ref": "PrivateSubnet3" }
         },
-        "PublicSubnet1CIDR": {
-            "Condition": "1AZCondition",
-            "Description": "Public subnet 1 CIDR in Availability Zone 1",
-            "Value": { "Ref": "PublicSubnet1CIDR" }
-        },
+        "PrivateSubnetIDs": {
+            "Condition": "3AZCondition",
+            "Description": "Private subnet IDs in all Availability Zones",
+            "Value": {"Fn::Join": [",", [
+                                            {"Ref": "PrivateSubnet1"}, 
+                                            {"Fn::If": [ "2AZCondition", { "Ref": "PrivateSubnet2" },"-"]},
+                                            {"Fn::If": [ "3AZCondition", { "Ref": "PrivateSubnet3" },"-"]}
+                                        ]]}
+        }, 
         "PublicSubnet1AID": {
             "Condition": "1AZCondition",
             "Description": "Public subnet 1 ID in Availability Zone 1",
             "Value": { "Ref": "PublicSubnet1" }
-        },
-        "PublicSubnet2CIDR": {
-            "Condition": "2AZCondition",
-            "Description": "Public subnet 2 CIDR in Availability Zone 2",
-            "Value": { "Ref": "PublicSubnet2CIDR" }
         },
         "PublicSubnet2AID": {
             "Condition": "2AZCondition",
             "Description": "Public subnet 2 ID in Availability Zone 2",
             "Value": { "Ref": "PublicSubnet2" }
         },
-        "PublicSubnet3CIDR": {
-            "Condition": "3AZCondition",
-            "Description": "Public subnet 3 CIDR in Availability Zone 3",
-            "Value": { "Ref": "PublicSubnet3CIDR" }
-        },
         "PublicSubnet3AID": {
             "Condition": "3AZCondition",
             "Description": "Public subnet 3 ID in Availability Zone 3",
             "Value": { "Ref": "PublicSubnet3" }
         },
+        "PublicSubnetIDs": {
+            "Condition": "3AZCondition",
+            "Description": "Public subnet IDs in all Availability Zones",
+            "Value": {"Fn::Join": [",", [
+                                            {"Ref": "PublicSubnet1"}, 
+                                            {"Fn::If": [ "2AZCondition", { "Ref": "PublicSubnet2" },"-"]},
+                                            {"Fn::If": [ "3AZCondition", { "Ref": "PublicSubnet3" },"-"]}
+                                        ]]}
+        },        
         "PrivateSubnet1RouteTable": {
             "Condition": "1AZCondition",
             "Value": {

@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "This template creates a security group with Ingress and Egress rules to restrict access to UIPath orchestrator and other instances",
+    "Description": "This template creates a security group with Ingress and Egress rules and IAM role to allow access to S3 bucket",
 	"Parameters": {
 		"VPCID": {
 			"Type": "AWS::EC2::VPC::Id"
@@ -138,7 +138,7 @@
 								"s3:ListBucketVersions",
 								"s3:ListBucketMultipartUploads"
 							],
-							"Resource": {"Fn::GetAtt" : ["S3Bucket", "Arn"]}
+							"Resource": { "Fn::Sub": [ "arn:aws:s3:::.${BucketArn}", { "BucketArn": {"Ref" : "StorageBucket" }} ]}
 						},
 						{
 							"Effect": "Allow",
@@ -153,14 +153,61 @@
 								"s3:PutObject",
 								"s3:PutObjectAcl"
 							],
-							"Resource": {"Fn::Join": ["/", [ {"Fn::GetAtt" : ["S3Bucket", "Arn"]}, "*" ]]}
+							"Resource": { "Fn::Sub": [ "arn:aws:s3:::.${BucketArn}/*", { "BucketArn": {"Ref" : "StorageBucket" }} ]}
 						}
 					]
 				},			
 				"PolicyName" : "storagegateway-iam-policy",
 				"Roles" : [ {"Ref": "IAMRole"} ]
 			}
-		}		        
+		},
+        "CustomLambdaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "storagegateway:*"
+                                    ],
+                                    "Resource": "*"
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"ec2:DescribeSnapshots",
+										"ec2:DeleteSnapshot"
+									],
+									"Resource": "*"
+								}								
+                            ]
+                        }
+                    }
+                ]
+            }
+        }				        
 	},
 	"Outputs": {
 		"SecurityGroup": {
@@ -178,6 +225,10 @@
 		"IAMPolicy": {
 			"Description": "Storage Gateway IAM Policy",
 			"Value": {"Ref": "IAMPolicy"}			
+		},
+		"CustomLambdaRoleArn": {
+			"Description": "ARN for IAM Role to be assumed by Lambda functinos creating Storage Gateway custom resources",
+			"Value": { "Fn::GetAtt" : ["CustomLambdaExecutionRole", "Arn"] }  
 		}					
 	}    
 }
