@@ -864,7 +864,7 @@
                     "StorageBucket": {"Ref": "StorageBucket"},
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
-                    "FileShareIAMRole": { "Fn::GetAtt" : ["SecurityStack", "Outputs.IAMRole"] },
+                    "FileShareIAMRole": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMRole"] },
                     "KeyPairName": {"Ref": "KeyPairName"},
                     "GatewayName": {"Ref": "GatewayName"},
                     "GatewayTimezone": {"Ref": "GatewayTimezone"},
@@ -908,18 +908,18 @@
                 "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" }
             }				
 		},		
-		"IAMRole" : {
+		"FileShareIAMRole" : {
 			"Description" : "IAM Role providing S3 Access to Storage Gateway",
-			"Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.IAMRole"] },
+			"Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMRole"] },
             "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-IAMRole" }
+                "Name": { "Fn::Sub": "${AWS::StackName}-FileShareIAMRole" }
             }			
 		},
-		"IAMPolicy": {
+		"FileShareIAMPolicy": {
 			"Description": "Storage Gateway IAM Policy",
-			"Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.IAMPolicy"] },
+			"Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMPolicy"] },
             "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-IAMPolicy" }
+                "Name": { "Fn::Sub": "${AWS::StackName}-FileShareIAMPolicy" }
             }				
         },
         "StorageBucket": {
@@ -928,6 +928,34 @@
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-StorageBucket" }
             }
-		}                       
+        },
+        "GatewayVMID1": {
+            "Description": "ID of Gateway VM in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["StorageStack", "Outputs.GatewayVMID1"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-GatewayVMID1" }
+            }
+        },
+        "GatewayVMPublicIP1": {
+            "Description": "Public IP of Gateway VM in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["StorageStack", "Outputs.GatewayVMPublicIP1"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-GatewayVMPublicIP1" }
+            }
+        },
+        "GatewayARN1": {
+            "Description": "ARN of Storage Gateway in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["StorageStack", "Outputs.GatewayARN1"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-GatewayARN1" }
+            }
+        },
+        "FileShareARN1": {
+            "Description": "ARN of S3 File Share in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["StorageStack", "Outputs.GatewayARN1"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-FileShareARN1" }
+            }
+		}                                                       
     }
 }

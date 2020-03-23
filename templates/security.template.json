@@ -99,7 +99,7 @@
 				
 			}
 		},		
-		"IAMRole": {
+		"FileShareIAMRole": {
 			"Type" : "AWS::IAM::Role",
 			"Properties" : {
 					"AssumeRolePolicyDocument": {
@@ -119,10 +119,10 @@
 						]
 					},
 					"Description" : "IAM Role providing S3 Access to Storage Gateway",
-					"RoleName": {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "IAMRole"]]}
+					"RoleName": {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "FileShareIAMRole"]]}
 				}
 		},
-		"IAMPolicy": {
+		"FileShareIAMPolicy": {
 			"Type" : "AWS::IAM::Policy",
 			"Properties" : {
 				"PolicyDocument": {
@@ -158,7 +158,7 @@
 					]
 				},			
 				"PolicyName" : "storagegateway-iam-policy",
-				"Roles" : [ {"Ref": "IAMRole"} ]
+				"Roles" : [ {"Ref": "FileShareIAMRole"} ]
 			}
 		},
         "CustomLambdaExecutionRole": {
@@ -218,13 +218,13 @@
             "Value": {"Fn::GetAtt" : ["S3Bucket", "Arn"]},
             "Description": "Storage Bucket ARN"
 		},
-		"IAMRole" : {
+		"FileShareIAMRole" : {
 			"Description" : "IAM Role providing S3 Access to Storage Gateway",
-			"Value" : {"Fn::GetAtt" : ["IAMRole", "Arn"]}			
+			"Value" : {"Fn::GetAtt" : ["FileShareIAMRole", "Arn"]}			
 		},
-		"IAMPolicy": {
+		"FileShareIAMPolicy": {
 			"Description": "Storage Gateway IAM Policy",
-			"Value": {"Ref": "IAMPolicy"}			
+			"Value": {"Ref": "FileShareIAMPolicy"}			
 		},
 		"CustomLambdaRoleArn": {
 			"Description": "ARN for IAM Role to be assumed by Lambda functinos creating Storage Gateway custom resources",

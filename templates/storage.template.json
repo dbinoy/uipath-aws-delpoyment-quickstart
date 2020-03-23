@@ -215,7 +215,7 @@
                         "    gatewayARN = physical_id",
                         "    print(f'Deleting storage gateway {gatewayARN} ...')",
                         "    gatewayARN = gatewayClient.delete_gateway(",
-                        "        GatewayARN=gatewayARN,",
+                        "        GatewayARN=gatewayARN",
                         "    )['GatewayARN']",                        
                         "    returnAttribute = {}",
                         "    returnAttribute['Arn'] = gatewayARN",
@@ -262,19 +262,13 @@
         "AddDiskCacheFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
-                "Description" : "Adds a disk cache",
+                "Description" : "Adds a disk cache to storage gateway VM",
                 "Handler": "index.handler",
                 "Role": {"Ref" : "CustomLambdaRoleArn"},
                 "Code": {
                     "ZipFile" : { "Fn::Join" : ["\n", [
-                        "import time",
                         "import boto3",
-                        "import shlex",
-                        "import subprocess",
                         "import cfnresponse",
-                        "from datetime import datetime",
-                        "from dateutil import tz",
-                        "ec2 = boto3.client('ec2')",
                         "gatewayClient = boto3.client('storagegateway')",
                         "def create(properties, physical_id):",
                         "    gatewayARN = properties['GatewayARN']",
@@ -346,20 +340,116 @@
                     "ServiceToken": { "Fn::GetAtt" : ["AddDiskCacheFunction", "Arn"] },
                     "GatewayARN": {"Ref" : "StorageGateway"}
             }
-        }                               	        
+        },
+        "CreateFileShareFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description" : "Creates a gateway S3 file share",
+                "Handler": "index.handler",
+                "Role": {"Ref" : "CustomLambdaRoleArn"},
+                "Code": {
+                    "ZipFile" : { "Fn::Join" : ["\n", [
+                        "import boto3",
+                        "import cfnresponse",
+                        "gatewayClient = boto3.client('storagegateway')",
+                        "def create(properties, physical_id):",
+                        "    gatewayARN = properties['GatewayARN']",
+                        "    storageBucket = properties['StorageBucket']",
+                        "    fileShareIAMRole = properties['FileShareIAMRole']",
+                        "    print(f'Creating NFS File Share for Gateway {gatewayARN} ...')",
+                        "    fileShareARN = gatewayClient.create_nfs_file_share(",
+                        "        ClientToken='UIPathS3FileStorageGatewayClient',",
+                        "        GatewayARN=gatewayARN",
+                        "        KMSEncrypted=False,",
+                        "        Role=fileShareIAMRole,",
+                        "        LocationARN=f'arn:aws:s3:::{storageBucket}',",
+                        "        DefaultStorageClass='S3_STANDARD',",
+                        "        ObjectACL='private',",
+                        "        ClientList=[ '0.0.0.0/0'],",
+                        "        Squash='RootSquash',",
+                        "        ReadOnly=False,",
+                        "        GuessMIMETypeEnabled=True,",
+                        "        RequesterPays=False,",
+                        "        Tags=[ { 'Key': 'Name', 'Value': 'UIPathS3FileStorageGatewayShare' } ]",
+                        "    )['FileShareARN']",
+                        "    print(f'Gateway ARN = {gatewayARN}, Fileshare ARN = {fileShareARN}')",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['Arn'] = fileShareARN",
+                        "    returnAttribute['Action'] = CREATE",
+                        "    return cfnresponse.SUCCESS, fileShareARN, returnAttribute",
+                        "def update(properties, physical_id):",
+                        "    fileShareARN = physical_id", 
+                        "    returnAttribute = {}",
+                        "    returnAttribute['Arn'] = fileShareARN",
+                        "    returnAttribute['Action'] = UPDATE",
+                        "    return cfnresponse.SUCCESS, fileShareARN, returnAttribute",
+                        "def delete(properties, physical_id):",
+                        "    fileShareARN = physical_id", 
+                        "    print(f'Deleting file share {fileShareARN} ...')",
+                        "    fileShareARN = gatewayClient.delete_file_shate(",
+                        "        FileShareARN=fileShareARN,",
+                        "        ForceDelete=True",
+                        "    )['FileShareARN']",                          
+                        "    returnAttribute = {}",
+                        "    returnAttribute['Arn'] = fileShareARN",
+                        "    returnAttribute['Action'] = DELETE",
+                        "    return cfnresponse.SUCCESS, fileShareARN, returnAttribute",
+                        "def handler(event, context):",
+                        "    print('Received event: ' + json.dumps(event))",
+                        "    status = cfnresponse.FAILED",
+                        "    new_physical_id = None",
+                        "    try:",
+                        "        properties = event.get('ResourceProperties')",
+                        "        physical_id = event.get('PhysicalResourceId')",
+                        "        status, new_physical_id, returnAttribute = {",
+                        "            'Create': create,",
+                        "            'Update': update,",
+                        "            'Delete': delete",
+                        "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
+                        "    except Exception as e:",
+                        "        print('Exception: ' + e)",
+                        "        status = cfnresponse.FAILED",
+                        "    finally:",
+                        "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
+                    ]]}
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30,
+                "TracingConfig": {
+                    "Mode": "Active"
+                }
+            }
+        },     
+		"FileShare": {
+            "Type": "Custom::FileShare",
+            "Properties": {
+                    "ServiceToken": { "Fn::GetAtt" : ["CreateFileShareFunction", "Arn"] },
+                    "GatewayARN": {"Ref" : "StorageGateway"},
+                    "StorageBucket": {"Ref" : "StorageBucket"},
+                    "FileShareIAMRole": {"Ref" : "FileShareIAMRole"}
+            }
+        }                                         	        
 	},
 	"Outputs": {
         "StorageBucketARN": {
             "Value": {"Fn::GetAtt" : ["S3Bucket", "Arn"]},
             "Description": "Storage Bucket ARN"
         },
-        "GatewayVMID": {
+        "GatewayVMID1": {
             "Value": {"Ref" : "Gateway"},
             "Description": "ID of Gateway VM in Public Subnet 1"
         },
-        "GatewayVMPublicIP": {
+        "GatewayVMPublicIP1": {
             "Value": {  "Fn::GetAtt": [ "Gateway", "PublicIp" ] },
             "Description": "Public IP of Gateway VM in Public Subnet 1"
-		}         					
+        },
+        "GatewayARN1": {
+            "Value": {  "Ref": "StorageGateway" },
+            "Description": "ARN of Storage Gateway in Public Subnet 1"
+        },
+        "FileShareARN1": {
+            "Value": {  "Ref": "FileShare" },
+            "Description": "ARN of S3 File Share in Public Subnet 1"
+		}                            					
 	}    
 }
