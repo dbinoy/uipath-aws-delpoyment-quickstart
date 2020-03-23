@@ -53,7 +53,17 @@
                         "GatewayName",
                         "GatewayTimezone"
                     ]
-                },                
+                },  
+                {
+                    "Label": {
+                        "default": "Domain Configuration"
+                    },
+                    "Parameters": [
+                        "Domain",
+                        "SubDomain",
+                        "ValidationDomain"
+                    ]
+                },                               
                 {
                     "Label": {
                         "default": "Quickstart Bucket configuration"
@@ -109,8 +119,16 @@
                 },
                 "TemplateLocation": {
                     "default": "Folder in S3 Bucket containing the Quickstart templates"
-                }                
-                                                                                                                                          
+                },                
+                "Domain": {
+                    "deafult": "Fully Qualified Domain Name for hosting"
+                },
+                "SubDomain": {
+                    "default": "Subdomain under which the app can be accessed"
+                },
+                "ValidationDomain": {
+                    "default": "Suffix of Email address to which domain validation emails to be sent"
+                }                                                                                                                                         
             }
         }
     },
@@ -806,7 +824,22 @@
                 "W-SU",
                 "Zulu"
               ]
-        },                         
+        }, 
+        "Domain": {
+            "Description": "Fully Qualified Domain Name for hosting",
+            "Type": "String",
+            "AllowedPattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){2,}([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]){2,}$",
+            "Default": "www.example.com",
+            "ConstraintDescription" : "Should be a fully qualified domain name"
+        },
+        "SubDomain": {
+            "Description": "Subdomain under which the app can be accessed",
+            "Type": "String"
+        },
+        "ValidationDomain": {
+            "Description": "Suffix of Email address to which domain validation emails to be sent",
+            "Type": "String"
+        },                                
         "SourceCodeBucket": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -871,7 +904,23 @@
                     "CustomLambdaRoleArn": { "Fn::GetAtt" : ["SecurityStack", "Outputs.CustomLambdaRoleArn"] }
                 }
             }
-        }                          
+        },
+        "RoutingStack": {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
+                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "TemplateLocation"}, "routing.template.json" ]]},
+                "Parameters" : {
+                    "VPCID": { "Fn::GetAtt" : ["NetworkStack", "Outputs.VPCID"] },
+                    "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
+                    "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
+                    "Domain": {"Ref": "Domain"},
+                    "SubDomain": {"Ref": "SubDomain"},
+                    "ValidationDomain": {"Ref": "ValidationDomain"}
+                }
+            }
+        }                                  
     },
     "Outputs": {
         "VPCID" : {
