@@ -63,7 +63,17 @@
                         "SubDomain",
                         "ValidationDomain"
                     ]
-                },                               
+                }, 
+                {
+                    "Label": {
+                        "default": "High Availability Configuration"
+                    },
+                    "Parameters": [
+                        "HAAUser",
+                        "HAAPassword",
+                        "HAALicense"
+                    ]
+                },                                               
                 {
                     "Label": {
                         "default": "Quickstart Bucket configuration"
@@ -128,7 +138,14 @@
                 },
                 "ValidationDomain": {
                     "default": "Suffix of Email address to which domain validation emails to be sent"
-                }                                                                                                                                         
+                },
+                "HAAUser": {
+                    "default": "testuser@example.com"                },
+                "HAAPassword": {
+                    "default": "123456"                }, 
+                "HAALicense": {
+                    "default": "2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r"
+                }                                                                                                                                                         
             }
         }
     },
@@ -839,7 +856,20 @@
         "ValidationDomain": {
             "Description": "Suffix of Email address to which domain validation emails to be sent",
             "Type": "String"
-        },                                
+        },    
+        "HAAUser": {
+            "Description": "High Availability Add-on username",
+            "Type": "String"
+        },
+        "HAAPassword": {
+            "Description": "High Availability Add-on username password",
+            "Type": "String"
+        }, 
+        "HAALicense": {
+            "Description": "High Availability Add-on license key",
+            "Type": "String",
+            "Default": "2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r"
+        },                                     
         "SourceCodeBucket": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -931,10 +961,13 @@
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
                     "KeyPairName": {"Ref": "KeyPairName"},
+                    "HAAUser": {"Ref": "HAAUser"},
+                    "HAAPassword": {"Ref": "HAAPassword"},
+                    "HAALicense": {"Ref": "HAALicense"},
                     "CustomLambdaRoleArn": { "Fn::GetAtt" : ["SecurityStack", "Outputs.CustomLambdaRoleArn"] }
                 }
             }
-        },                                          
+        }                                        
     },
     "Outputs": {
         "VPCID" : {
