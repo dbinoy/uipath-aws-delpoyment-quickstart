@@ -1005,6 +1005,55 @@
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-FileShareARN1" }
             }
-		}                                                       
+        },
+        "ApplicationLoadBalancer": {
+            "Description": "Application Load Balancer Name",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "ApplicationLoadBalancer"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-ApplicationLoadBalancer" }
+            }            
+        },     
+        "TargetGroup": {
+            "Description": "Target Group Name",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "TargetGroup"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-TargetGroup" }
+            }            
+        },                 
+        "HostedZoneID": {
+            "Description": "Route53 Hosted Zone ID",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "HostedZoneID"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HostedZoneID" }
+            }            
+        },        
+        "AWSCertificate": {
+            "Description": "AWS Certificate Manager Certificate Resource",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "AWSCertificate"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-AWSCertificate" }
+            }            
+        },
+        "HttpListener": {
+            "Description": "HTTP Listener ARN",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "HttpListener"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HttpListener" }
+            }            
+        },
+        "HttpsListener": {
+            "Description": "HTTPS Listener ARN",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "HttpsListener"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HttpsListener" }
+            }            
+        },
+        "RecordSet": {
+            "Description": "Route53 A Record",
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "RecordSet"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-RecordSet" }
+            }            
+        }                                                               
     }
 }
