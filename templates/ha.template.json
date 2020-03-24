@@ -1,0 +1,198 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This template creates a cluster to provide high availability",
+    "Parameters": {
+        "SubnetIDs": {
+            "Description": "Comma separated Subnet IDs where Gateway VMs need to be launched",
+            "Type": "CommaDelimitedList"
+        },  
+        "GatewaySecurityGroup": {
+            "Description": "Security Group behind which Storage Gateway VMs would be placed",
+            "Type": "String"
+        },      
+        "KeyPairName"   : {
+            "Description": "EC2 Instance Key pair name",
+            "Type": "String"
+        },                
+        "CustomLambdaRoleArn": {
+            "Description": "ARN for IAM Role to be assumed by Lambda functinos creating Storage Gateway custom resources",
+            "Type": "String"
+        }          
+    },
+    "Conditions": {
+        "1AZCondition": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                        "-"
+                    ]
+                }
+            ]            
+        },
+        "2AZCondition": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        { "Fn::Select" : [ "1", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                        "-"
+                    ]
+                }
+            ]            
+        },
+        "3AZCondition": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        { "Fn::Select" : [ "2", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                        "-"
+                    ]
+                }
+            ]            
+        }                
+    },     
+    "Resources": {
+        "FindAMIFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description" : "Finds a matching AMI Id",
+                "Handler": "index.handler",
+                "Role": {"Ref" : "CustomLambdaRoleArn"},
+                "Code": {
+                    "ZipFile" : { "Fn::Join" : ["\n", [
+                        "import boto3",
+                        "def create(properties, physical_id):",
+                        "    regionName = properties['RegionName']",
+                        "    imageName = properties['ImageName']",
+                        "    architecture = properties['Architecture']",
+                        "    virtualizationType = properties['VirtualizationType']",
+                        "    owners = properties['Owners']",
+                        "    imageId = ''",
+                        "    ec2 = boto3.client('ec2', regionName)",
+                        "    images = ec2.describe_images(",
+                        "        ExecutableUsers=['all'],",
+                        "        Filters=[",
+                        "            { 'Name': 'name', 'Values': [imageName] },",
+                        "            { 'Name': 'state', 'Values': ['available'] },",
+                        "            { 'Name': 'architecture', 'Values': [architecture] },",
+                        "            { 'Name': 'virtualization-type', 'Values': [virtualizationType] }",
+                        "        ],",
+                        "        Owners=[owners]",
+                        "    )['Images']",
+                        "    if len(images) > 0:",
+                        "        imageId = images[0]['ImageId']",
+                        "    print(regionName, imageId)",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['ImageId'] = imageId",
+                        "    returnAttribute['Action'] = CREATE",
+                        "    return cfnresponse.SUCCESS, imageId, returnAttribute",
+                        "def update(properties, physical_id):",
+                        "    imageId = physical_id",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['ImageId'] = imageId",
+                        "    returnAttribute['Action'] = UPDATE",
+                        "    return cfnresponse.SUCCESS, imageId, returnAttribute",
+                        "def delete(properties, physical_id):",
+                        "    imageId = physical_id",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['ImageId'] = imageId",
+                        "    returnAttribute['Action'] = DELETE",
+                        "    return cfnresponse.SUCCESS, imageId, returnAttribute",                        
+                        "def handler(event, context):",
+                        "    print('Received event: ' + json.dumps(event))",
+                        "    status = cfnresponse.FAILED",
+                        "    new_physical_id = None",
+                        "    try:",
+                        "        properties = event.get('ResourceProperties')",
+                        "        physical_id = event.get('PhysicalResourceId')",
+                        "        status, new_physical_id, returnAttribute = {",
+                        "            'Create': create,",
+                        "            'Update': update,",
+                        "            'Delete': delete",
+                        "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
+                        "    except Exception as e:",
+                        "        print('Exception: ' + e)",
+                        "        status = cfnresponse.FAILED",
+                        "    finally:",
+                        "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
+                    ]]}
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30,
+                "TracingConfig": {
+                    "Mode": "Active"
+                }
+            }
+        },
+		"HAInstanceAMI": {
+            "Type": "Custom::HAInstanceAMI",
+            "Properties": {
+                    "ServiceToken": { "Fn::GetAtt" : ["FindAMIFunction", "Arn"] },
+                    "RegionName": { "Ref" : "AWS::Region" },                    
+                    "ImageName": "RHEL-7.7*_HVM_GA*",
+                    "Architecture": "x86_64",
+                    "VirtualizationType": "hvm",
+                    "Owners": "309956199498"
+            }
+        },
+        "HAMaster": {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : { "Ref" : "HAInstanceAMI"},
+                "InstanceType" : "m4.xlarge",
+                "KeyName" : {"Ref": "KeyPairName"},
+                "SecurityGroupIds" : [ {"Ref": "GatewaySecurityGroup"} ],
+                "SubnetId" : { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                "Tags" : [ { "Key": "Name", "Value": {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "HA-Master" ]]} } ]
+            }
+        },   
+        "HASlave1": {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : { "Ref" : "HAInstanceAMI"},
+                "InstanceType" : "m4.xlarge",
+                "KeyName" : {"Ref": "KeyPairName"},
+                "SecurityGroupIds" : [ {"Ref": "GatewaySecurityGroup"} ],
+                "SubnetId" : { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                "Tags" : [ { "Key": "Name", "Value": {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "HA-Slave-1" ]]} } ]
+            }
+        },    
+        "HASlave2": {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : { "Ref" : "HAInstanceAMI"},
+                "InstanceType" : "m4.xlarge",
+                "KeyName" : {"Ref": "KeyPairName"},
+                "SecurityGroupIds" : [ {"Ref": "GatewaySecurityGroup"} ],
+                "SubnetId" : { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                "Tags" : [ { "Key": "Name", "Value": {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "HA-Slave-2" ]]} } ]
+            }
+        }                           
+    },
+    "Outputs": {
+        "HAMasterID": {
+            "Value": {"Ref" : "HAMaster"},
+            "Description": "ID of HA Master VM in Private Subnet 1"
+        },
+        "HAMasterPrivateIP": {
+            "Value": {  "Fn::GetAtt": [ "HAMaster", "PrivateIp" ] },
+            "Description": "Private IP of HA Master VM in Private Subnet 1"
+        }, 
+        "HASlave1ID": {
+            "Value": {"Ref" : "HASlave1"},
+            "Description": "ID of HA Slave 1 VM in Private Subnet 1"
+        },
+        "HASlave1PrivateIP": {
+            "Value": {  "Fn::GetAtt": [ "HASlave1", "PrivateIp" ] },
+            "Description": "Private IP of HA Slave 1 VM in Private Subnet 1"
+        },  
+        "HASlave2ID": {
+            "Value": {"Ref" : "HASlave2"},
+            "Description": "ID of HA Slave 2 VM in Private Subnet 1"
+        },
+        "HASlave2PrivateIP": {
+            "Value": {  "Fn::GetAtt": [ "HASlave2", "PrivateIp" ] },
+            "Description": "Private IP of HA Slave 2 VM in Private Subnet 1"
+        }                      
+    }
+}

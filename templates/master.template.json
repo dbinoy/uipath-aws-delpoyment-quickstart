@@ -920,7 +920,21 @@
                     "ValidationDomain": {"Ref": "ValidationDomain"}
                 }
             }
-        }                                  
+        },
+        "HAStack": {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
+                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "TemplateLocation"}, "ha.template.json" ]]},
+                "Parameters" : {
+                    "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
+                    "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
+                    "KeyPairName": {"Ref": "KeyPairName"},
+                    "CustomLambdaRoleArn": { "Fn::GetAtt" : ["SecurityStack", "Outputs.CustomLambdaRoleArn"] }
+                }
+            }
+        },                                          
     },
     "Outputs": {
         "VPCID" : {
@@ -1054,6 +1068,48 @@
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-RecordSet" }
             }            
-        }                                                               
+        },
+        "HAMasterID": {
+            "Description": "ID of HA Master VM in Private Subnet 1",
+            "Value": {"Fn::GetAtt" : ["HAStack", "HAMasterID"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HAMasterID" }
+            }
+        },
+        "HAMasterPrivateIP": {            
+            "Description": "Private IP of HA Master VM in Private Subnet 1",
+            "Value": {"Fn::GetAtt" : ["HAStack", "HAMasterPrivateIP" ] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HAMasterPrivateIP" }
+            }            
+        }, 
+        "HASlave1ID": {            
+            "Description": "ID of HA Slave 1 VM in Private Subnet 1",
+            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave1ID0"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HASlave1ID" }
+            }
+        },
+        "HASlave1PrivateIP": {            
+            "Description": "Private IP of HA Slave 1 VM in Private Subnet 1",
+            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave1PrivateIP" ] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HASlave1PrivateIP" }
+            }
+        },  
+        "HASlave2ID": {            
+            "Description": "ID of HA Slave 2 VM in Private Subnet 1",
+            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave2ID"]},
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HASlave2ID" }
+            }
+        },
+        "HASlave2PrivateIP": {            
+            "Description": "Private IP of HA Slave 2 VM in Private Subnet 1",
+            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave2PrivateIP" ] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HASlave2PrivateIP" }
+            }
+        }                                                                        
     }
 }
