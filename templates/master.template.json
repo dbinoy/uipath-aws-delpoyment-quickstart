@@ -73,7 +73,18 @@
                         "HAAPassword",
                         "HAALicense"
                     ]
-                },                                               
+                },  
+                {
+                    "Label": {
+                        "default": "RDS Database Configuration"
+                    },
+                    "Parameters": [
+                        "RDSDBName",
+                        "RDSAllocatedStorage",
+                        "RDSUsername",
+                        "RDSPassword"
+                    ]
+                },                                                               
                 {
                     "Label": {
                         "default": "Quickstart Bucket configuration"
@@ -123,13 +134,7 @@
                 },
                 "StorageBucket": {
                     "default": "S3 Bucket name storing UIPath files from Storage Gateway"
-                },                                
-                "SourceCodeBucket": {
-                    "default": "S3 Bucket name hosting the Quickstart templates"
-                },
-                "TemplateLocation": {
-                    "default": "Folder in S3 Bucket containing the Quickstart templates"
-                },                
+                },                                               
                 "Domain": {
                     "deafult": "Fully Qualified Domain Name for hosting"
                 },
@@ -145,7 +150,22 @@
                     "default": "123456"                }, 
                 "HAALicense": {
                     "default": "2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r"
-                }                                                                                                                                                         
+                },
+                "RDSDBName": {
+                    "default": "RDS Database Name"
+                },         
+                "RDSAllocatedStorage": {
+                    "default": "Storage amount to be allocated to RDS DB Instance"
+                },
+                "RDSUsername": {
+                    "default": "RDS DB username"
+                },
+                "SourceCodeBucket": {
+                    "default": "S3 Bucket name hosting the Quickstart templates"
+                },
+                "TemplateLocation": {
+                    "default": "Folder in S3 Bucket containing the Quickstart templates"
+                }                                                                                                                                                                                         
             }
         }
     },
@@ -869,7 +889,24 @@
             "Description": "High Availability Add-on license key",
             "Type": "String",
             "Default": "2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r"
-        },                                     
+        },    
+        "RDSDBName": {
+            "Description": "RDS Database Name",
+            "Type": "String"
+        },         
+        "RDSAllocatedStorage": {
+            "Description": "Storage amount to be allocated to RDS DB Instance",
+            "Type": "String"
+        },
+        "RDSUsername": {
+            "Description": "RDS DB username",
+            "Type": "String"
+        },
+        "RDSPassword": {
+            "Description": "RDS DB password",
+            "Type": "String",
+            "NoEcho": "true"
+        },                                          
         "SourceCodeBucket": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -967,7 +1004,23 @@
                     "CustomLambdaRoleArn": { "Fn::GetAtt" : ["SecurityStack", "Outputs.CustomLambdaRoleArn"] }
                 }
             }
-        }                                        
+        },
+        "DatabaseStack": {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
+                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "TemplateLocation"}, "database.template.json" ]]},
+                "Parameters" : {
+                    "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
+                    "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
+                    "RDSDBName": {"Ref": "RDSDBName"},
+                    "RDSAllocatedStorage": {"Ref": "RDSAllocatedStorage"},
+                    "RDSUsername": {"Ref": "RDSUsername"},
+                    "RDSPassword": {"Ref": "RDSPassword"}
+                }
+            }
+        }                                                
     },
     "Outputs": {
         "VPCID" : {
@@ -1143,6 +1196,34 @@
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HASlave2PrivateIP" }
             }
-        }                                                                        
+        },
+        "DBSubnetGroup": {
+            "Description": "RDS-MSSQL private subnet group",
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "DBSubnetGroup"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-DBSubnetGroup" }
+            }
+        },
+        "RDSDBInstanceID": {
+            "Description": "RDS-MSSQL Database Instance ID",
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "RDSDBInstanceID"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-RDSDBInstanceID" }
+            }            
+        },
+        "RDSDBInstanceEndpointAddress": {
+            "Description": "RDS-MSSQL Database Instance Endpoint Address",
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "RDSDBInstanceEndpointAddress"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-RDSDBInstanceEndpointAddress" }
+            }            
+        },
+        "RDSDBInstanceEndpointPort": {
+            "Description": "RDS-MSSQL Database Instance Endpoint Port",
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "RDSDBInstanceEndpointPort"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-RDSDBInstanceEndpointPort" }
+            }            
+        }                                                                                
     }
 }

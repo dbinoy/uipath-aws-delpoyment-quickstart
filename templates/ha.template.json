@@ -19,7 +19,7 @@
             "Type": "String"
         },
         "HAAPassword": {
-            "Description": "High Availability Add-on username password",
+            "Description": "High Availability Add-on password",
             "Type": "String"
         }, 
         "HAALicense": {
