@@ -11,7 +11,7 @@
         },      
         "SubnetIDs": {
             "Description": "Comma separated Subnet IDs where Gateway VMs need to be launched",
-            "Type": "CommaDelimitedList"
+            "Type": " String"
         },          
         "Domain": {
             "Description": "Fully Qualified Domain Name for hosting",
@@ -185,7 +185,11 @@
             "Value": {"Fn::GetAtt" : ["ApplicationLoadBalancer", "LoadBalancerFullName"]},
             "Description": "Application Load Balancer Name"
         },     
-        "TargetGroup": {
+        "TargetGroupName": {
+            "Value": {"Ref" : "TargetGroup"},
+            "Description": "Target Group Name"
+        },         
+        "TargetGroupARN": {
             "Value": {"Fn::GetAtt" : ["TargetGroup", "TargetGroupFullName"]},
             "Description": "Target Group Name"
         },                 

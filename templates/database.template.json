@@ -4,7 +4,7 @@
     "Parameters": {
         "SubnetIDs": {
             "Description": "Comma separated Subnet IDs where Gateway VMs need to be launched",
-            "Type": "CommaDelimitedList"
+            "Type": "String"
         },
         "GatewaySecurityGroup": {
             "Description": "Security Group behind which Storage Gateway VMs would be placed",

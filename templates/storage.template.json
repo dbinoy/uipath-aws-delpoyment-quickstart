@@ -11,7 +11,7 @@
         },
         "SubnetIDs": {
             "Description": "Comma separated Subnet IDs where Gateway VMs need to be launched",
-            "Type": "CommaDelimitedList"
+            "Type": "String"
         },
         "GatewaySecurityGroup": {
             "Description": "Security Group behind which Storage Gateway VMs would be placed",
@@ -443,6 +443,10 @@
             "Value": {  "Fn::GetAtt": [ "Gateway", "PublicIp" ] },
             "Description": "Public IP of Gateway VM in Public Subnet 1"
         },
+        "GatewayVMPrivateIP1": {
+            "Value": {  "Fn::GetAtt": [ "Gateway", "PrivateIp" ] },
+            "Description": "Private IP of Gateway VM in Public Subnet 1"
+        },        
         "GatewayARN1": {
             "Value": {  "Ref": "StorageGateway" },
             "Description": "ARN of Storage Gateway in Public Subnet 1"
