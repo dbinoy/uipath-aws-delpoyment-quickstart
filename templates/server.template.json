@@ -21,17 +21,17 @@
         "FindAMIFunctionArn": {
             "Description": "ARN for Lambda function used to find AMI by name",
             "Type": "String"
-        },
-        "AdminPassword": {
-            "Description": "Windows Administrator password to login as",
-            "Type": "String",
-            "NoEcho": "true"
-        },        
+        },       
         "OrchestratorVersion": {
             "Description": "UIPath Orchestrator Version Number",
             "Type": "String",
             "Default": "19.10.15"
         },
+        "OrchestratorInstanceCount": {
+            "Description": "Desired Capacity (instance count) for Orchestrator instances",
+            "Type": "String",
+            "Default": "1"
+        },          
         "OrchestratorLicense": {
             "Description": "Orchestrator license code",
             "Type": "String",
@@ -46,12 +46,12 @@
             "Description": "Orchestrator Administrator password to login as",
             "Type": "String",
             "NoEcho": "true"
-        },
-        "OrchestratorInstanceCount": {
-            "Description": "Desired Capacity (instance count) for Orchestrator instances",
+        },  
+        "AdminPassword": {
+            "Description": "Windows Administrator password to login as",
             "Type": "String",
-            "Default": "1"
-        },        
+            "NoEcho": "true"
+        },             
         "DatabaseServerName": {
             "Description": "RDS Instance endpoint URL",
             "Type": "String"

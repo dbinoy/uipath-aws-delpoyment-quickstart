@@ -84,7 +84,20 @@
                         "RDSUsername",
                         "RDSPassword"
                     ]
-                },                                                               
+                },    
+                {
+                    "Label": {
+                        "default": "Orchestrator Server Configuration"
+                    },
+                    "Parameters": [
+                        "OrchestratorVersion",
+                        "OrchestratorInstanceCount",
+                        "OrchestratorLicense",
+                        "OrchestratorPassPhrase",
+                        "OrchestratorPassword",
+                        "AdminPassword"
+                    ]
+                },                                                                             
                 {
                     "Label": {
                         "default": "Quickstart Bucket configuration"
@@ -159,7 +172,19 @@
                 },
                 "RDSUsername": {
                     "default": "RDS DB username"
+                },       
+                "OrchestratorVersion": {
+                    "default": "19.10.15"
                 },
+                "OrchestratorInstanceCount": {
+                    "default": "1"
+                },                      
+                "OrchestratorLicense": {
+                    "default": "DSGFSFGAGEHTERSEGW$%^%YHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFH+ADAAdwBvACEAJwAgADAAKAA="
+                },         
+                "OrchestratorPassPhrase": {
+                    "default": "Aw3s0m3Orch35tr4t0r"
+                },                
                 "SourceCodeBucket": {
                     "default": "S3 Bucket name hosting the Quickstart templates"
                 },
@@ -196,25 +221,25 @@
         },   
         "InstanceType": {
             "AllowedValues": [
-              "t2.micro",
-              "t2.small",
-              "t2.medium",
-              "t2.large",
-              "m4.large",
-              "m4.xlarge",
-              "m4.2xlarge",
-              "m4.4xlarge",
-              "m4.10xlarge",
-              "c4.large",
-              "c4.xlarge",
-              "c4.2xlarge",
-              "c4.4xlarge",
-              "c4.8xlarge",
-              "r4.large",
-              "r4.xlarge",
-              "r4.2xlarge",
-              "r4.4xlarge",
-              "r4.8xlarge"
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "r4.large",
+                "r4.xlarge",
+                "r4.2xlarge",
+                "r4.4xlarge",
+                "r4.8xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type.",
             "Default": "t2.medium",
@@ -906,7 +931,37 @@
             "Description": "RDS DB password",
             "Type": "String",
             "NoEcho": "true"
-        },                                          
+        },  
+        "OrchestratorVersion": {
+            "Description": "UIPath Orchestrator Version Number",
+            "Type": "String",
+            "Default": "19.10.15"
+        },
+        "OrchestratorInstanceCount": {
+            "Description": "Desired Capacity (instance count) for Orchestrator instances",
+            "Type": "String",
+            "Default": "1"
+        },                 
+        "OrchestratorLicense": {
+            "Description": "Orchestrator license code",
+            "Type": "String",
+            "Default": "DSGFSFGAGEHTERSEGW$%^%YHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFH+ADAAdwBvACEAJwAgADAAKAA="
+        },         
+        "OrchestratorPassPhrase": {
+            "Description": "Orchestrator Passphrase in order to generate NuGet API keys, App encryption key and machine keys.",
+            "Type": "String",
+            "Default": "Aw3s0m3Orch35tr4t0r"
+        }, 
+        "OrchestratorPassword": {
+            "Description": "Orchestrator Administrator password to login as",
+            "Type": "String",
+            "NoEcho": "true"
+        }, 
+        "AdminPassword": {
+            "Description": "Windows Administrator password to login as",
+            "Type": "String",
+            "NoEcho": "true"
+        },                                                          
         "SourceCodeBucket": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -1092,7 +1147,37 @@
                     "RDSPassword": {"Ref": "RDSPassword"}
                 }
             }
-        }                                                
+        },
+        "ServerStack": {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
+                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "TemplateLocation"}, "server.template.json" ]]},
+                "Parameters" : {
+                    "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
+                    "TargetGroupARN": { "Fn::GetAtt" : ["RoutingStack", "Outputs.TargetGroupARN"] },
+                    "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
+                    "KeyPairName": {"Ref": "KeyPairName"},
+                    "FindAMIFunctionArn": { "Fn::GetAtt" : ["FindAMIFunction", "Arn"] },
+                    "OrchestratorVersion": {"Ref": "OrchestratorVersion"},
+                    "OrchestratorInstanceCount": {"Ref": "OrchestratorInstanceCount"},
+                    "OrchestratorLicense": {"Ref": "OrchestratorLicense"},
+                    "OrchestratorPassPhrase": {"Ref": "OrchestratorPassPhrase"},
+                    "OrchestratorPassword": {"Ref": "OrchestratorPassword"},
+                    "AdminPassword": {"Ref": "AdminPassword"},
+                    "DatabaseServerName": { "Fn::GetAtt" : ["DatabaseStack", "Outputs.RDSDBInstanceEndpointAddress"] },
+                    "DatabaseName": {"Ref": "RDSDBName"},
+                    "DatabaseUsername": {"Ref": "RDSUsername"},
+                    "DatabasePassword": {"Ref": "RDSPassword"},
+                    "StorageBucket": {"Ref": "StorageBucket"},
+                    "GatewayPrivateIP": { "Fn::GetAtt" : ["StorageStack", "Outputs.GatewayVMPrivateIP1"] },
+                    "HAMasterPrivateIP": { "Fn::GetAtt" : ["HAStack", "Outputs.HAMasterPrivateIP" ] },
+                    "HASlavePrivateIP": { "Fn::GetAtt" : ["HAStack", "Outputs.HASlave1PrivateIP" ] },
+                    "HAAPassword": {"Ref": "HAAPassword"}
+                }
+            }
+        }                                                        
     },
     "Outputs": {
         "VPCID" : {
@@ -1187,129 +1272,143 @@
         },
         "ApplicationLoadBalancer": {
             "Description": "Application Load Balancer Name",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "ApplicationLoadBalancer"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.ApplicationLoadBalancer"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-ApplicationLoadBalancer" }
             }            
         },     
         "TargetGroupName": {
             "Description": "Target Group Name",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "TargetGroupName"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.TargetGroupName"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-TargetGroupName" }
             }            
         }, 
         "TargetGroupARN": {
             "Description": "Target Group ARN",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "TargetGroupARN"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.TargetGroupARN"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-TargetGroupARN" }
             }            
         },                         
         "HostedZoneID": {
             "Description": "Route53 Hosted Zone ID",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "HostedZoneID"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.HostedZoneID"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HostedZoneID" }
             }            
         },        
         "AWSCertificate": {
             "Description": "AWS Certificate Manager Certificate Resource",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "AWSCertificate"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.AWSCertificate"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-AWSCertificate" }
             }            
         },
         "HttpListener": {
             "Description": "HTTP Listener ARN",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "HttpListener"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.HttpListener"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HttpListener" }
             }            
         },
         "HttpsListener": {
             "Description": "HTTPS Listener ARN",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "HttpsListener"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.HttpsListener"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HttpsListener" }
             }            
         },
         "RecordSet": {
             "Description": "Route53 A Record",
-            "Value": {"Fn::GetAtt" : ["RoutingStack", "RecordSet"]},
+            "Value": {"Fn::GetAtt" : ["RoutingStack", "Outputs.RecordSet"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-RecordSet" }
             }            
         },
         "HAMasterID": {
             "Description": "ID of HA Master VM in Private Subnet 1",
-            "Value": {"Fn::GetAtt" : ["HAStack", "HAMasterID"]},
+            "Value": {"Fn::GetAtt" : ["HAStack", "Outputs.HAMasterID"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HAMasterID" }
             }
         },
         "HAMasterPrivateIP": {            
             "Description": "Private IP of HA Master VM in Private Subnet 1",
-            "Value": {"Fn::GetAtt" : ["HAStack", "HAMasterPrivateIP" ] },
+            "Value": {"Fn::GetAtt" : ["HAStack", "Outputs.HAMasterPrivateIP" ] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HAMasterPrivateIP" }
             }            
         }, 
         "HASlave1ID": {            
             "Description": "ID of HA Slave 1 VM in Private Subnet 1",
-            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave1ID0"]},
+            "Value": {"Fn::GetAtt" : ["HAStack", "Outputs.HASlave1ID"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HASlave1ID" }
             }
         },
         "HASlave1PrivateIP": {            
             "Description": "Private IP of HA Slave 1 VM in Private Subnet 1",
-            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave1PrivateIP" ] },
+            "Value": {"Fn::GetAtt" : ["HAStack", "Outputs.HASlave1PrivateIP" ] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HASlave1PrivateIP" }
             }
         },  
         "HASlave2ID": {            
             "Description": "ID of HA Slave 2 VM in Private Subnet 1",
-            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave2ID"]},
+            "Value": {"Fn::GetAtt" : ["HAStack", "Outputs.HASlave2ID"]},
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HASlave2ID" }
             }
         },
         "HASlave2PrivateIP": {            
             "Description": "Private IP of HA Slave 2 VM in Private Subnet 1",
-            "Value": {"Fn::GetAtt" : ["HAStack", "HASlave2PrivateIP" ] },
+            "Value": {"Fn::GetAtt" : ["HAStack", "Outputs.HASlave2PrivateIP" ] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-HASlave2PrivateIP" }
             }
         },
         "DBSubnetGroup": {
             "Description": "RDS-MSSQL private subnet group",
-            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "DBSubnetGroup"] },
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "Outputs.DBSubnetGroup"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-DBSubnetGroup" }
             }
         },
         "RDSDBInstanceID": {
             "Description": "RDS-MSSQL Database Instance ID",
-            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "RDSDBInstanceID"] },
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "Outputs.RDSDBInstanceID"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-RDSDBInstanceID" }
             }            
         },
         "RDSDBInstanceEndpointAddress": {
             "Description": "RDS-MSSQL Database Instance Endpoint Address",
-            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "RDSDBInstanceEndpointAddress"] },
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "Outputs.RDSDBInstanceEndpointAddress"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-RDSDBInstanceEndpointAddress" }
             }            
         },
         "RDSDBInstanceEndpointPort": {
             "Description": "RDS-MSSQL Database Instance Endpoint Port",
-            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "RDSDBInstanceEndpointPort"] },
+            "Value":  { "Fn::GetAtt" : ["DatabaseStack", "Outputs.RDSDBInstanceEndpointPort"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-RDSDBInstanceEndpointPort" }
             }            
-        }                                                                                
+        },
+        "LaunchTemplate": {
+            "Description": "Launch configuration template",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.LaunchTemplate"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-LaunchTemplate" }
+            }              
+        }, 
+        "AutoScalingGroup": {
+            "Description": "Auto sclaing group",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.AutoScalingGroup"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-AutoScalingGroup" }
+            }            
+        }                                                                                         
     }
 }
