@@ -2,10 +2,14 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "This template creates a cluster to provide high availability",
     "Parameters": {
-        "SubnetIDs": {
-            "Description": "Comma separated Subnet IDs where Gateway VMs need to be launched",
+        "PrivateSubnetIDs": {
+            "Description": "Comma separated Private Subnet IDs where Orchestrator VMs need to be launched",
             "Type": "String"
         }, 
+        "PublicSubnetIDs": {
+            "Description": "Comma separated Public Subnet IDs where Bastion hosts need to be launched",
+            "Type": "String"
+        },        
         "TargetGroupARN": {
             "Description": "ARN for Elastic load balancer target group",
             "Type": "String"
@@ -99,7 +103,7 @@
             "Fn::Not": [
                 {
                     "Fn::Equals": [
-                        { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                        { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "PrivateSubnetIDs"}]}] },
                         "-"
                     ]
                 }
@@ -109,7 +113,7 @@
             "Fn::Not": [
                 {
                     "Fn::Equals": [
-                        { "Fn::Select" : [ "1", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                        { "Fn::Select" : [ "1", { "Fn::Split": [",", {"Ref": "PrivateSubnetIDs"}]}] },
                         "-"
                     ]
                 }
@@ -119,7 +123,7 @@
             "Fn::Not": [
                 {
                     "Fn::Equals": [
-                        { "Fn::Select" : [ "2", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                        { "Fn::Select" : [ "2", { "Fn::Split": [",", {"Ref": "PrivateSubnetIDs"}]}] },
                         "-"
                     ]
                 }
@@ -127,8 +131,8 @@
         }                
     },     
     "Resources": {
-		"OrchestratorInstanceAMI": {
-            "Type": "Custom::OrchestratorInstanceAMI",
+		"HostInstanceAMI": {
+            "Type": "Custom::HostInstanceAMI",
             "Properties": {
                     "ServiceToken": { "Ref" : "FindAMIFunctionArn" },
                     "RegionName": { "Ref" : "AWS::Region" },                    
@@ -153,7 +157,7 @@
                         }
                     } 
                 ],                
-                "ImageId" : { "Ref" : "OrchestratorInstanceAMI"},
+                "ImageId" : { "Ref" : "HostInstanceAMI"},
                 "InstanceType" : "m4.large",
                 "KeyName" : {"Ref": "KeyPairName"},
                 "LaunchConfigurationName" : {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "Orchestrator-LaunchConfiguration" ]]},
@@ -221,18 +225,18 @@
                 ],
                 "TargetGroupARNs" : [ {"Ref": "TargetGroupARN"} ],
                 "VPCZoneIdentifier" : [ 
-                    { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                    { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "PrivateSubnetIDs"}]}] },
                     {
                         "Fn::If": [
                             "2AZCondition",
-                            { "Fn::Select" : [ "1", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                            { "Fn::Select" : [ "1", { "Fn::Split": [",", {"Ref": "PrivateSubnetIDs"}]}] },
                             { "Ref": "AWS::NoValue" }
                         ]
                     },
                     {
                         "Fn::If": [
                             "3AZCondition",
-                            { "Fn::Select" : [ "2", { "Fn::Split": [",", {"Ref": "SubnetIDs"}]}] },
+                            { "Fn::Select" : [ "2", { "Fn::Split": [",", {"Ref": "PrivateSubnetIDs"}]}] },
                             { "Ref": "AWS::NoValue" }
                         ]
                     }                    
@@ -352,7 +356,32 @@
                 "AlarmActions" : [ {"Ref": "ScaleDownAutoScalingPolicy"} ],
                 "ActionsEnabled" : true
             }
-        }                                   
+        },
+        "BastionHost": {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : { "Ref" : "HostInstanceAMI"},
+                "InstanceType" : "m4.xlarge",
+                "KeyName" : {"Ref": "KeyPairName"},
+                "SecurityGroupIds" : [ {"Ref": "GatewaySecurityGroup"} ],
+                "SubnetId" : { "Fn::Select" : [ "0", { "Fn::Split": [",", {"Ref": "PublicSubnetIDs"}]}] },
+                "UserData" : {
+                    "Fn::Base64" : {
+                        "Fn::Join" : [ "\n", [                         
+                            "<script>",
+                            "    winrm quickconfig -q & winrm set winrm/config/winrs @{MaxMemoryPerShellMB=\"300\"} & winrm set winrm/config @{MaxTimeoutms=\"1800000\"} & winrm set winrm/config/service @{AllowUnencrypted=\"true\"} & winrm set winrm/config/service/auth @{Basic=\"true\"} & winrm/config @{MaxEnvelopeSizekb=\"8000kb\"}",
+                            "</script>",
+                            "<powershell>",
+                            "netsh advfirewall firewall add rule name=\"WinRM in\" protocol=TCP dir=in profile=any localport=5985 remoteip=any localip=any action=allow",                            
+                            "$admin = [ADSI](\"WinNT://./administrator, user\")",
+                            { "Fn::Sub": [ "$admin.SetPassword(\"${AdminPassword}\")", { "AdminPassword": {"Ref" : "AdminPassword" }} ]},                                
+                            "</powershell>"
+                        ] ]
+                    }
+                },                
+                "Tags" : [ { "Key": "Name", "Value": {"Fn::Join": ["-", [{"Ref": "AWS::StackName"}, "BastionHost" ]]} } ]
+            }
+        }                                           
     },
     "Outputs": {
         "LaunchTemplate": {
@@ -386,6 +415,18 @@
         "LowCPUAlarm": {
             "Value": {"Ref" : "LowCPUAlarm"},
             "Description": "Low cpu usage alarm"
-        }                                                         
+        },
+        "BastionHostID": {
+            "Value": {"Ref" : "BastionHost"},
+            "Description": "ID of BastionHost VM in Public Subnet 1"
+        },
+        "BastionHostPrivateIP": {
+            "Value": {  "Fn::GetAtt": [ "BastionHost", "PrivateIp" ] },
+            "Description": "Private IP of BastionHost in Public Subnet 1"
+        },   
+        "BastionHostPublicIP": {
+            "Value": {  "Fn::GetAtt": [ "BastionHost", "PublicIp" ] },
+            "Description": "Private IP of BastionHost in Public Subnet 1"
+        }                                                                       
     }
 }

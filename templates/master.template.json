@@ -1155,7 +1155,8 @@
                                     {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
                                     {"Ref": "TemplateLocation"}, "server.template.json" ]]},
                 "Parameters" : {
-                    "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
+                    "PrivateSubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
+                    "PublicSubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
                     "TargetGroupARN": { "Fn::GetAtt" : ["RoutingStack", "Outputs.TargetGroupARN"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
                     "KeyPairName": {"Ref": "KeyPairName"},
@@ -1451,6 +1452,27 @@
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-LowCPUAlarm" }
             }             
-        }                                                                                                  
+        },
+        "BastionHostID": {
+            "Description": "ID of BastionHost VM in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.BastionHostID"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-BastionHostID" }
+            }             
+        },
+        "BastionHostPrivateIP": {
+            "Description": "Private IP of BastionHost in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.BastionHostPrivateIP"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-BastionHostPrivateIP" }
+            }             
+        },   
+        "BastionHostPublicIP": {
+            "Description": "Private IP of BastionHost in Public Subnet 1",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.BastionHostPublicIP"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-BastionHostPublicIP" }
+            }             
+        }                                                                                                           
     }
 }
