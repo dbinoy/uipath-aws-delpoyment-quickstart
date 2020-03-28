@@ -238,7 +238,121 @@
                     }                    
                 ]
             }
-        }          
+        },
+        "ScaleUpAutoScalingPolicy" : {
+            "Type" : "AWS::AutoScaling::ScalingPolicy",
+            "Properties" : {
+                "AdjustmentType" : "ChangeInCapacity",
+                "AutoScalingGroupName" : {"Ref": "AutoScalingGroup"},
+                "Cooldown" : "300",
+                "ScalingAdjustment" : 1
+            }
+        },
+        "ScaleDownAutoScalingPolicy" : {
+            "Type" : "AWS::AutoScaling::ScalingPolicy",
+            "Properties" : {
+                "AdjustmentType" : "ChangeInCapacity",
+                "AutoScalingGroupName" : {"Ref": "AutoScalingGroup"},
+                "Cooldown" : "300",
+                "ScalingAdjustment" : -1
+            }
+        },
+        "HighMemoryAlarm": {
+            "Type" : "AWS::CloudWatch::Alarm",
+            "Properties" : {
+                "AlarmName" : "mem-util-high-orchestrator",
+                "AlarmDescription" : "This metric monitors ec2 memory for high utilization on Orchestrator hosts",
+                "Namespace" : "Windows/Default",
+                "MetricName" : "MemoryUtilization",                
+                "ComparisonOperator" : "GreaterThanOrEqualToThreshold",
+                "EvaluationPeriods" : 2,
+                "Period" : 300,
+                "Statistic" : "Average",
+                "Threshold" : 80,
+                "Dimensions" : [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "AutoScalingGroup"
+                        }
+                    }                    
+                ],                
+                "AlarmActions" : [ {"Ref": "ScaleUpAutoScalingPolicy"} ],
+                "ActionsEnabled" : true
+            }
+        },
+        "LowMemoryAlarm": {
+            "Type" : "AWS::CloudWatch::Alarm",
+            "Properties" : {
+                "AlarmName" : "mem-util-low-orchestrator",
+                "AlarmDescription" : "This metric monitors ec2 memory for low utilization on Orchestrator hosts",
+                "Namespace" : "Windows/Default",
+                "MetricName" : "MemoryUtilization",                
+                "ComparisonOperator" : "LessThanOrEqualToThreshold",
+                "EvaluationPeriods" : 2,
+                "Period" : 300,
+                "Statistic" : "Average",
+                "Threshold" : 40,
+                "Dimensions" : [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "AutoScalingGroup"
+                        }
+                    }                    
+                ],                
+                "AlarmActions" : [ {"Ref": "ScaleDownAutoScalingPolicy"} ],
+                "ActionsEnabled" : true
+            }
+        },
+        "HighCPUAlarm": {
+            "Type" : "AWS::CloudWatch::Alarm",
+            "Properties" : {
+                "AlarmName" : "cpu-util-high-orchestrator",
+                "AlarmDescription" : "This metric monitors ec2 cpu for high utilization on Orchestrator hosts",
+                "Namespace" : "AWS/EC2",
+                "MetricName" : "CPUUtilization",                
+                "ComparisonOperator" : "GreaterThanOrEqualToThreshold",
+                "EvaluationPeriods" : 2,
+                "Period" : 120,
+                "Statistic" : "Average",
+                "Threshold" : 60,
+                "Dimensions" : [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "AutoScalingGroup"
+                        }
+                    }                    
+                ],                
+                "AlarmActions" : [ {"Ref": "ScaleUpAutoScalingPolicy"} ],
+                "ActionsEnabled" : true
+            }
+        },
+        "LowCPUAlarm": {
+            "Type" : "AWS::CloudWatch::Alarm",
+            "Properties" : {
+                "AlarmName" : "mem-util-low-orchestrator",
+                "AlarmDescription" : "This metric monitors ec2 memory for low utilization on Orchestrator hosts",
+                "Namespace" : "AWS/EC2",
+                "MetricName" : "CPUUtilization",                
+                "ComparisonOperator" : "LessThanOrEqualToThreshold",
+                "EvaluationPeriods" : 2,
+                "Period" : 120,
+                "Statistic" : "Average",
+                "Threshold" : 10,
+                "Dimensions" : [
+                    {
+                        "Name": "AutoScalingGroupName",
+                        "Value": {
+                            "Ref": "AutoScalingGroup"
+                        }
+                    }                    
+                ],                
+                "AlarmActions" : [ {"Ref": "ScaleDownAutoScalingPolicy"} ],
+                "ActionsEnabled" : true
+            }
+        }                                   
     },
     "Outputs": {
         "LaunchTemplate": {
@@ -248,6 +362,30 @@
         "AutoScalingGroup": {
             "Value": {"Ref" : "AutoScalingGroup"},
             "Description": "Auto sclaing group"
-        }               
+        },
+        "ScaleUpAutoScalingPolicy": {
+            "Value": {"Ref" : "ScaleUpAutoScalingPolicy"},
+            "Description": "Auto scaling policy to scale up resources"
+        },
+        "ScaleDownAutoScalingPolicy": {
+            "Value": {"Ref" : "ScaleDownAutoScalingPolicy"},
+            "Description": "Auto scaling policy to scale down resources"
+        },
+        "HighMemoryAlarm": {
+            "Value": {"Ref" : "HighMemoryAlarm"},
+            "Description": "High memory usage alarm"
+        },
+        "LowMemoryAlarm": {
+            "Value": {"Ref" : "LowMemoryAlarm"},
+            "Description": "Low memory usage alarm"
+        },
+        "HighCPUAlarm": {
+            "Value": {"Ref" : "HighCPUAlarm"},
+            "Description": "High cpu usage alarm"
+        },
+        "LowCPUAlarm": {
+            "Value": {"Ref" : "LowCPUAlarm"},
+            "Description": "Low cpu usage alarm"
+        }                                                         
     }
 }

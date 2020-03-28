@@ -1409,6 +1409,48 @@
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-AutoScalingGroup" }
             }            
-        }                                                                                         
+        },
+        "ScaleUpAutoScalingPolicy": {
+            "Description": "Auto scaling policy to scale up resources",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.ScaleUpAutoScalingPolicy"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-ScaleUpAutoScalingPolicy" }
+            }              
+        },
+        "ScaleDownAutoScalingPolicy": {
+            "Description": "Auto scaling policy to scale down resources",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.ScaleDownAutoScalingPolicy"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-ScaleDownAutoScalingPolicy" }
+            }               
+        },
+        "HighMemoryAlarm": {
+            "Description": "High memory usage alarm",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.HighMemoryAlarm"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HighMemoryAlarm" }
+            }             
+        },
+        "LowMemoryAlarm": {
+            "Description": "Low memory usage alarm",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.LowMemoryAlarm"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-LowMemoryAlarm" }
+            }            
+        },
+        "HighCPUAlarm": {
+            "Description": "High cpu usage alarm",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.HighCPUAlarm"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-HighCPUAlarm" }
+            }             
+        },
+        "LowCPUAlarm": {
+            "Description": "Low cpu usage alarm",
+            "Value": { "Fn::GetAtt" : ["ServerStack", "Outputs.LowCPUAlarm"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-LowCPUAlarm" }
+            }             
+        }                                                                                                  
     }
 }
