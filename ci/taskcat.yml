@@ -2,6 +2,7 @@ global:
   qsname: uipath-aws-delpoyment-quickstart
   regions:
     - us-east-1
+    - us-west-2
   reporting: true
 tests:
   lab-master-vpc:
