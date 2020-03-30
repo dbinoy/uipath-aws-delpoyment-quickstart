@@ -95,8 +95,8 @@
                         "default": "Quickstart Bucket configuration"
                     },
                     "Parameters": [
-                        "SourceCodeBucket",
-                        "TemplateLocation"
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
                     ]
                 }                                                                                    
             ],
@@ -174,10 +174,10 @@
                 "OrchestratorPassPhrase": {
                     "default": "Aw3s0m3Orch35tr4t0r"
                 },                
-                "SourceCodeBucket": {
+                "QSS3BucketName": {
                     "default": "S3 Bucket name hosting the Quickstart templates"
                 },
-                "TemplateLocation": {
+                "QSS3KeyPrefix": {
                     "default": "Folder in S3 Bucket containing the Quickstart templates"
                 }                                                                                                                                                                                         
             }
@@ -282,11 +282,10 @@
             "Type": "String",
             "Description": "Bucket to create for file storage",
             "AllowedPattern": "^([a-z]|(\\d(?!\\d{0,2}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})))([a-z\\d]|(\\.(?!(\\.|-)))|(-(?!\\.))){1,61}[a-z\\d\\.]$",
-            "Default": "uipath-storage-bucket",
             "ConstraintDescription" : "Should be a Valid S3 Bucket Name"
         }, 
         "GatewayName": {
-            "Description": "SName of Stirage Gateway",
+            "Description": "SName of Storage Gateway",
             "Type": "String"            
         },
         "GatewayTimezone": {
@@ -868,7 +867,8 @@
                 "WET",
                 "W-SU",
                 "Zulu"
-              ]
+            ],
+            "Default": "US/Eastern"
         }, 
         "Domain": {
             "Description": "Fully Qualified Domain Name for hosting",
@@ -879,19 +879,23 @@
         },
         "SubDomain": {
             "Description": "Subdomain under which the app can be accessed",
-            "Type": "String"
+            "Type": "String",
+            "Default": "app"
         },
         "ValidationDomain": {
             "Description": "Suffix of Email address to which domain validation emails to be sent",
-            "Type": "String"
+            "Type": "String",
+            "Default": "admin"
         },    
         "HAAUser": {
             "Description": "High Availability Add-on username",
-            "Type": "String"
+            "Type": "String",
+            "Default": "test@corp.com"
         },
         "HAAPassword": {
             "Description": "High Availability Add-on username password",
-            "Type": "String"
+            "Type": "String",
+            "Default": "123456"
         }, 
         "HAALicense": {
             "Description": "High Availability Add-on license key",
@@ -900,20 +904,24 @@
         },    
         "RDSDBName": {
             "Description": "RDS Database Name",
-            "Type": "String"
+            "Type": "String",
+            "Default": "awstest"
         },         
         "RDSAllocatedStorage": {
             "Description": "Storage amount to be allocated to RDS DB Instance",
-            "Type": "String"
+            "Type": "String",
+            "Default": "100"
         },
         "RDSUsername": {
             "Description": "RDS DB username",
-            "Type": "String"
+            "Type": "String",
+            "Default": "devtestaws"
         },
         "RDSPassword": {
             "Description": "RDS DB password",
             "Type": "String",
-            "NoEcho": "true"
+            "NoEcho": "true",
+            "Default": "!Aw3s0m3Orch35tr4t0r"
         },  
         "OrchestratorVersion": {
             "Description": "UIPath Orchestrator Version Number",
@@ -938,21 +946,22 @@
         "OrchestratorPassword": {
             "Description": "Orchestrator Administrator password to login as",
             "Type": "String",
-            "NoEcho": "true"
+            "NoEcho": "true",
+            "Default": "123456@4dmin"
         }, 
         "AdminPassword": {
             "Description": "Windows Administrator password to login as",
             "Type": "String",
-            "NoEcho": "true"
+            "NoEcho": "true",
+            "Default": "Q123!w3s0m3Orch35tr4t0r"
         },                                                          
-        "SourceCodeBucket": {
+        "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Default": "uipath-aws-delpoyment-quickstart",
             "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
             "Type": "String"
         },
-        "TemplateLocation": {
+        "QSS3KeyPrefix": {
             "AllowedPattern": "^[0-9a-zA-Z-]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, and hyphens (-).",
             "Default": "templates",
@@ -965,16 +974,16 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "network.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "network.template.json" ]]},
                 "Parameters" : {
                     "AvailabilityZones": {"Fn::Join": ["-", {"Ref": "AvailabilityZones"} ]},
                     "NumberOfAZs": {"Ref": "NumberOfAZs"},
                     "VPCCIDR": {"Ref": "VPCCIDR"},
-                    "PublicSubnetTag1": {	"Ref": "PublicSubnetTag1"},
+                    "PublicSubnetTag1": {"Ref": "PublicSubnetTag1"},
                     "PublicSubnetTag2": {"Ref": "PublicSubnetTag2"},
                     "PublicSubnetTag3": {"Ref": "PublicSubnetTag3"},
-                    "PrivateSubnetTag1": {	"Ref": "PrivateSubnetTag1"},
+                    "PrivateSubnetTag1": {"Ref": "PrivateSubnetTag1"},
                     "PrivateSubnetTag2": {"Ref": "PrivateSubnetTag2"},
                     "PrivateSubnetTag3": {"Ref": "PrivateSubnetTag3"}                                         
                 }
@@ -984,8 +993,8 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "security.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "security.template.json" ]]},
                 "Parameters" : {
                     "VPCID": { "Fn::GetAtt" : ["NetworkStack", "Outputs.VPCID"] },
                     "VPCCIDR": {"Ref": "VPCCIDR"}                                      
@@ -1068,8 +1077,8 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "storage.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "storage.template.json" ]]},
                 "Parameters" : {
                     "StorageBucket": {"Ref": "StorageBucket"},
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
@@ -1086,8 +1095,8 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "routing.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "routing.template.json" ]]},
                 "Parameters" : {
                     "VPCID": { "Fn::GetAtt" : ["NetworkStack", "Outputs.VPCID"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
@@ -1102,8 +1111,8 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "ha.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "ha.template.json" ]]},
                 "Parameters" : {
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
@@ -1119,8 +1128,8 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "database.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "database.template.json" ]]},
                 "Parameters" : {
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
@@ -1135,8 +1144,8 @@
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
                 "TemplateURL" : {"Fn::Join": ["/", ["https:", "",
-                                    {"Fn::Join": [".", [ {"Ref": "SourceCodeBucket"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
-                                    {"Ref": "TemplateLocation"}, "server.template.json" ]]},
+                                    {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
+                                    {"Ref": "QSS3KeyPrefix"}, "server.template.json" ]]},
                 "Parameters" : {
                     "PrivateSubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PrivateSubnetIDs"] },
                     "PublicSubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
@@ -1192,26 +1201,26 @@
                 "Name": { "Fn::Sub": "${AWS::StackName}-S3VPCEndpoint" }
             }
         },
-		"SecurityGroup": {
-			"Description": "Security Group allowing access to WindowsRM from anywhere",
-            "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },            
+        "SecurityGroup": {
+            "Description": "Security Group allowing access to WindowsRM from anywhere",
+            "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" }
-            }				
-		},		
-		"FileShareIAMRole" : {
-			"Description" : "IAM Role providing S3 Access to Storage Gateway",
-			"Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMRole"] },
+            }
+        },
+        "FileShareIAMRole" : {
+            "Description" : "IAM Role providing S3 Access to Storage Gateway",
+            "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMRole"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-FileShareIAMRole" }
-            }			
-		},
-		"FileShareIAMPolicy": {
-			"Description": "Storage Gateway IAM Policy",
-			"Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMPolicy"] },
+            }
+        },
+        "FileShareIAMPolicy": {
+            "Description": "Storage Gateway IAM Policy",
+            "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMPolicy"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-FileShareIAMPolicy" }
-            }				
+            }
         },
         "StorageBucketARN": {
             "Description": "Storage Bucket ARN",

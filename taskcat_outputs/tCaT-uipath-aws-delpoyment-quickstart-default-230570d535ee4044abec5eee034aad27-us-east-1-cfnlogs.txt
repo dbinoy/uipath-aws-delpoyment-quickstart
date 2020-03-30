@@ -1,0 +1,21 @@
+-----------------------------------------------------------------------------
+Region: us-east-1
+StackName: tCaT-uipath-aws-delpoyment-quickstart-default-230570d535ee4044abec5eee034aad27
+*****************************************************************************
+ResourceStatusReason:  
+The following resource(s) failed to create: [NetworkStack].
+*****************************************************************************
+*****************************************************************************
+Events:  
+TimeStamp                         ResourceStatus      ResourceType                LogicalResourceId                                                               ResourceStatusReason
+--------------------------------  ------------------  --------------------------  ------------------------------------------------------------------------------  ---------------------------------------------------------------------------------------------
+2020-03-30 20:32:40.756000+00:00  CREATE_FAILED       AWS::CloudFormation::Stack  tCaT-uipath-aws-delpoyment-quickstart-default-230570d535ee4044abec5eee034aad27  The following resource(s) failed to create: [NetworkStack].
+2020-03-30 20:32:39.328000+00:00  CREATE_FAILED       AWS::CloudFormation::Stack  NetworkStack                                                                    S3 error: Access Denied
+                                                                                                                                                                  For more information check http://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
+2020-03-30 20:32:38.721000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  NetworkStack
+2020-03-30 20:32:26.573000+00:00  CREATE_IN_PROGRESS  AWS::CloudFormation::Stack  tCaT-uipath-aws-delpoyment-quickstart-default-230570d535ee4044abec5eee034aad27  User Initiated
+*****************************************************************************
+-----------------------------------------------------------------------------
+Tested on: Monday, 30. March 2020 01:33PM
+-----------------------------------------------------------------------------
+
