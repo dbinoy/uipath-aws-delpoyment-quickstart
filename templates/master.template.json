@@ -910,7 +910,8 @@
         "HAAPassword": {
             "Description": "High Availability Add-on password.",
             "Type": "String",
-            "Default": "123456"
+            "Default": "123456",
+            "NoEcho": "true"
         }, 
         "HAALicense": {
             "Description": "license key, purchased from UIPath, to be used with optional High Availability Add-on.",
