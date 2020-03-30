@@ -20,11 +20,11 @@
             "Default": "www.example.com",
             "ConstraintDescription" : "Should be a fully qualified domain name"
         },
-        "SubDomain": {
+        "AppSubDomain": {
             "Description": "Subdomain under which the app can be accessed",
             "Type": "String"
         },
-        "ValidationDomain": {
+        "ValidationSubDomain": {
             "Description": "Suffix of Email address to which domain validation emails to be sent",
             "Type": "String"
         }                 
@@ -121,7 +121,7 @@
                 "DomainValidationOptions" : [ 
                     {
                         "DomainName" : {"Ref": "Domain"},
-                        "ValidationDomain" : {"Ref": "ValidationDomain"}
+                        "ValidationDomain" : {"Ref": "ValidationSubDomain"}
                     } 
                 ],
                 "ValidationMethod" : "DNS"
@@ -169,7 +169,7 @@
             "Type" : "AWS::Route53::RecordSet",
             "Properties" : {
                 "HostedZoneId" : {"Ref" : "HostedZone"},
-                "Name" : { "Fn::Join" : [".", [{"Ref": "SubDomain"}, {"Ref": "Domain"}]]},
+                "Name" : { "Fn::Join" : [".", [{"Ref": "AppSubDomain"}, {"Ref": "Domain"}]]},
                 "Type" : "A",
                 
                 "AliasTarget" : {

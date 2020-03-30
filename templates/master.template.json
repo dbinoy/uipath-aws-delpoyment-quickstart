@@ -52,8 +52,8 @@
                     },
                     "Parameters": [
                         "Domain",
-                        "SubDomain",
-                        "ValidationDomain"
+                        "AppSubDomain",
+                        "ValidationSubDomain"
                     ]
                 }, 
                 {
@@ -102,90 +102,104 @@
             ],
             "ParameterLabels": {
                 "AvailabilityZones": {
-                    "default": "Availability Zones"
+                    "default": "Availability Zone(s) selection"
                 },
                 "NumberOfAZs": {
-                    "default": "Number of Availability Zones"
+                    "default": "Number of AZs to use"
                 },
                 "VPCCIDR": {
                     "default": "VPC CIDR"
-                },                       
-                "PublicSubnetTag1": {
-                    "default": "Tag for Public subnet 1"
-                },  
-                "PublicSubnetTag2": {
-                    "default": "Tag for Public subnet 2"
-                },      
-                "PublicSubnetTag3": {
-                    "default": "Tag for Public subnet 3"
-                },                                                                      
+                },                   
                 "PrivateSubnetTag1": {
-                    "default": "Tag for Private subnet 1"
+                    "default": "Private subnet 1 tag"
                 },      
                 "PrivateSubnetTag2": {
-                    "default": "Tag for Private subnet 2"
+                    "default": "Private subnet 2 tag"
                 },         
                 "PrivateSubnetTag3": {
-                    "default": "Tag for Private subnet 3"
-                },
+                    "default": "Private subnet 3 tag"
+                },                    
+                "PublicSubnetTag1": {
+                    "default": "Public subnet 1 tag"
+                },  
+                "PublicSubnetTag2": {
+                    "default": "Public subnet 2 tag"
+                },      
+                "PublicSubnetTag3": {
+                    "default": "Public subnet 3 tag"
+                },                                                                      
                 "KeyPairName": {
-                    "default": "Orchestrator Instance Key pair name"
+                    "default": "Instance Key pair"
                 },
                 "InstanceType": {
-                    "default": "Orchestrator Instance type"
+                    "default": "Instance type"
                 },
                 "StorageBucket": {
-                    "default": "S3 Bucket name storing UIPath files from Storage Gateway"
-                },                                               
+                    "default": "Bucket to create for file storage"
+                },  
+                "GatewayName": {
+                    "deafult": "Storage Gateway"
+                },                                             
                 "Domain": {
-                    "deafult": "Fully Qualified Domain Name for hosting"
+                    "deafult": "Hosting FQDN"
                 },
-                "SubDomain": {
-                    "default": "Subdomain under which the app can be accessed"
+                "AppSubDomain": {
+                    "default": "App Sub-domain"
                 },
-                "ValidationDomain": {
-                    "default": "Suffix of Email address to which domain validation emails to be sent"
+                "ValidationSubDomain": {
+                    "default": "Validation Sub-domain"
                 },
                 "HAAUser": {
-                    "default": "testuser@example.com"                },
+                    "default": "HA Addon Username"
+                },
                 "HAAPassword": {
-                    "default": "123456"                }, 
+                    "default": "HA Addon Password"
+                }, 
                 "HAALicense": {
-                    "default": "2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r"
+                    "default": "HA Addon License Key"
                 },
                 "RDSDBName": {
                     "default": "RDS Database Name"
                 },         
                 "RDSAllocatedStorage": {
-                    "default": "Storage amount to be allocated to RDS DB Instance"
+                    "default": "RDS Allocated Storage"
                 },
                 "RDSUsername": {
-                    "default": "RDS DB username"
-                },       
+                    "default": "DB Username"
+                },     
+                "RDSPassword": {
+                    "default": "DB Password"
+                },                    
                 "OrchestratorVersion": {
-                    "default": "19.10.15"
+                    "default": "Orchestrator Version Number"
                 },
                 "OrchestratorInstanceCount": {
-                    "default": "1"
+                    "default": "Orchestrator Instance Count"
                 },                      
                 "OrchestratorLicense": {
-                    "default": "DSGFSFGAGEHTERSEGW$%^%YHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFH+ADAAdwBvACEAJwAgADAAKAA="
+                    "default": "Orchestrator License Key"
                 },         
                 "OrchestratorPassPhrase": {
-                    "default": "Aw3s0m3Orch35tr4t0r"
-                },                
+                    "default": "Orchestrator Pass Phrase"
+                },  
+                "OrchestratorPassword": {
+                    "default": "Orchestrator Password"
+                },
+                "AdminPassword": {
+                    "default": "Admin Password"
+                },                                              
                 "QSS3BucketName": {
-                    "default": "S3 Bucket name hosting the Quickstart templates"
+                    "default": "Template hosting Bucket"
                 },
                 "QSS3KeyPrefix": {
-                    "default": "Folder in S3 Bucket containing the Quickstart templates"
+                    "default": "Template folder"
                 }                                                                                                                                                                                         
             }
         }
     },
     "Parameters": {       
         "AvailabilityZones": {
-            "Description": "List of Availability Zones to use for the subnets in the VPC. Maximum of 3 Availability Zones are used for this deployment, and the logical order of your selections is preserved.",
+            "Description": "List of Availability Zones to use for the subnets in the VPC - maximum of 3 AZs are used for this deployment (logical order of your selections is preserved).",
             "Type": "List<AWS::EC2::AvailabilityZone::Name>"
         },
         "NumberOfAZs": {
@@ -195,11 +209,60 @@
                 "3"
             ],
             "Default": "1",
-            "Description": "Number of Availability Zones to use in the VPC (upto 3). This must match your selections in the list of Availability Zones parameter.",
+            "Description": "Number of Availability Zones to use in the VPC (upto 3), must match your selections in the list of Availability Zones parameter.",
             "Type": "String"
-        },        
+        }, 
+        "VPCCIDR": {
+            "AllowedPattern": "^([0-9]{1,3}\\.){2}([0]{1}.)[0]{1}(\\/[16]{2})$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.0.0/16",
+            "Default": "10.0.0.0/16",
+            "Description": "CIDR block for the VPC, must be in the form x.x.0.0/16.",
+            "Type": "String"
+        },
+        "PrivateSubnetTag1": {
+            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
+            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
+            "Default": "Network=Private1",
+            "Description": "Tag to add to private subnet 1 in format Key=Value (Optional).",
+            "Type": "String"
+        },
+        "PrivateSubnetTag2": {
+            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
+            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
+            "Default": "Network=Private2",
+            "Description": "Tag to add to private subnet 2 in format Key=Value (Optional).",
+            "Type": "String"
+        },
+        "PrivateSubnetTag3": {
+            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
+            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
+            "Default": "Network=Private3",
+            "Description": "Tag to add to private subnet 3 in format Key=Value (Optional).",
+            "Type": "String"
+        },            
+        "PublicSubnetTag1": {
+            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
+            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
+            "Default": "Network=Public1",
+            "Description": "Tag to add to public subnet 1 in format Key=Value (Optional)",
+            "Type": "String"
+        },
+        "PublicSubnetTag2": {
+            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
+            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
+            "Default": "Network=Public2",
+            "Description": "Tag to add to public subnet 2 in format Key=Value (Optional).",
+            "Type": "String"
+        },
+        "PublicSubnetTag3": {
+            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
+            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
+            "Default": "Network=Public3",
+            "Description": "Tag to add to public subnet 3 in format Key=Value (Optional).",
+            "Type": "String"
+        },                        
         "KeyPairName": {
-            "Description": "EC2 Instance Key pair name",
+            "Description": "Existing Key Pair, which is to be used to Log in to VM instances.",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },   
         "InstanceType": {
@@ -224,68 +287,20 @@
                 "r4.4xlarge",
                 "r4.8xlarge"
             ],
-            "ConstraintDescription": "Must be a valid EC2 instance type.",
+            "ConstraintDescription": "Class of instance, must be a valid EC2 instance type from the list.",
             "Default": "t2.medium",
             "Description": "EC2 instance type",
             "Type": "String"
-        },             
-        "VPCCIDR": {
-            "AllowedPattern": "^([0-9]{1,3}\\.){2}([0]{1}.)[0]{1}(\\/[16]{2})$",
-            "ConstraintDescription": "CIDR block parameter must be in the form x.x.0.0/16",
-            "Default": "10.0.0.0/16",
-            "Description": "CIDR block for the VPC",
-            "Type": "String"
-        },    
-        "PrivateSubnetTag1": {
-            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
-            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
-            "Default": "Network=Private",
-            "Description": "Tag to add to private subnet 1 in format Key=Value (Optional)",
-            "Type": "String"
-        },
-        "PrivateSubnetTag2": {
-            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
-            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
-            "Default": "",
-            "Description": "Tag to add to private subnet 2 in format Key=Value (Optional)",
-            "Type": "String"
-        },
-        "PrivateSubnetTag3": {
-            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
-            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
-            "Default": "",
-            "Description": "Tag to add to private subnet 3 in format Key=Value (Optional)",
-            "Type": "String"
-        },            
-        "PublicSubnetTag1": {
-            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
-            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
-            "Default": "Network=Public",
-            "Description": "Tag to add to public subnet 1 in format Key=Value (Optional)",
-            "Type": "String"
-        },
-        "PublicSubnetTag2": {
-            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
-            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
-            "Default": "",
-            "Description": "Tag to add to public subnet 2 in format Key=Value (Optional)",
-            "Type": "String"
-        },
-        "PublicSubnetTag3": {
-            "AllowedPattern": "^([a-zA-Z0-9+\\-._:/@]+=[a-zA-Z0-9+\\-.,_:/@ *\\\\\"'\\[\\]\\{\\}]*)?$",
-            "ConstraintDescription": "tags must be in format \"Key=Value\" keys can only contain [a-zA-Z0-9+\\-._:/@], values can contain [a-zA-Z0-9+\\-._:/@ *\\\\\"'\\[\\]\\{\\}]",
-            "Default": "",
-            "Description": "Tag to add to public subnet 3 in format Key=Value (Optional)",
-            "Type": "String"
-        },
+        },                
         "StorageBucket" :{
             "Type": "String",
-            "Description": "Bucket to create for file storage",
+            "Description": "S3 Bucket name storing UIPath files from Storage Gateway, should be a Valid S3 Bucket Name.",
+            "Default": "uipath-files-bucket",
             "AllowedPattern": "^([a-z]|(\\d(?!\\d{0,2}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})))([a-z\\d]|(\\.(?!(\\.|-)))|(-(?!\\.))){1,61}[a-z\\d\\.]$",
-            "ConstraintDescription" : "Should be a Valid S3 Bucket Name"
+            "ConstraintDescription" : "Bucket to be used to store files for syncing with gateway, should be a Valid S3 Bucket Name"
         }, 
         "GatewayName": {
-            "Description": "SName of Storage Gateway",
+            "Description": "Name of S3 File Storage Gateway.",
             "Type": "String"            
         },
         "GatewayTimezone": {
@@ -871,70 +886,70 @@
             "Default": "US/Eastern"
         }, 
         "Domain": {
-            "Description": "Fully Qualified Domain Name for hosting",
+            "Description": "Fully Qualified Domain Name under which app is to be hosted.",
             "Type": "String",
             "AllowedPattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){2,}([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]){2,}$",
             "Default": "www.example.com",
             "ConstraintDescription" : "Should be a fully qualified domain name"
         },
-        "SubDomain": {
-            "Description": "Subdomain under which the app can be accessed",
+        "AppSubDomain": {
+            "Description": "Subdomain under which the app can be accessed.",
             "Type": "String",
             "Default": "app"
         },
-        "ValidationDomain": {
-            "Description": "Suffix of Email address to which domain validation emails to be sent",
+        "ValidationSubDomain": {
+            "Description": "Suffix of Email address to which domain validation emails to be sent.",
             "Type": "String",
             "Default": "admin"
         },    
         "HAAUser": {
-            "Description": "High Availability Add-on username",
+            "Description": "High Availability Add-on username.",
             "Type": "String",
             "Default": "test@corp.com"
         },
         "HAAPassword": {
-            "Description": "High Availability Add-on username password",
+            "Description": "High Availability Add-on password.",
             "Type": "String",
             "Default": "123456"
         }, 
         "HAALicense": {
-            "Description": "High Availability Add-on license key",
+            "Description": "license key, purchased from UIPath, to be used with optional High Availability Add-on.",
             "Type": "String",
             "Default": "2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r2353tgewsdfweg34t342rftg23g2g23t2r32r"
         },    
         "RDSDBName": {
-            "Description": "RDS Database Name",
+            "Description": "Name for UIPath Database to be created.",
             "Type": "String",
             "Default": "awstest"
         },         
         "RDSAllocatedStorage": {
-            "Description": "Storage amount to be allocated to RDS DB Instance",
+            "Description": "Storage amount to be allocated to RDS DB Instance.",
             "Type": "String",
             "Default": "100"
         },
         "RDSUsername": {
-            "Description": "RDS DB username",
+            "Description": "Username to be used to log on to Database.",
             "Type": "String",
             "Default": "devtestaws"
         },
         "RDSPassword": {
-            "Description": "RDS DB password",
+            "Description": "Password to be used to log on to Database.",
             "Type": "String",
             "NoEcho": "true",
             "Default": "!Aw3s0m3Orch35tr4t0r"
         },  
         "OrchestratorVersion": {
-            "Description": "UIPath Orchestrator Version Number",
+            "Description": "UIPath Orchestrator Version to be installed.",
             "Type": "String",
             "Default": "19.10.15"
         },
         "OrchestratorInstanceCount": {
-            "Description": "Desired Capacity (instance count) for Orchestrator instances",
+            "Description": "Desired Capacity (instance count) for Orchestrator instances.",
             "Type": "String",
             "Default": "1"
         },                 
         "OrchestratorLicense": {
-            "Description": "Orchestrator license code",
+            "Description": "License key, purchased from UIPath, to be used with Orchestrator.",
             "Type": "String",
             "Default": "DSGFSFGAGEHTERSEGW$%^%YHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFHYHFDHDFHTTYJTKDGVXCFHGDSFSHJHMHKDGDFH+ADAAdwBvACEAJwAgADAAKAA="
         },         
@@ -944,13 +959,13 @@
             "Default": "Aw3s0m3Orch35tr4t0r"
         }, 
         "OrchestratorPassword": {
-            "Description": "Orchestrator Administrator password to login as",
+            "Description": "Orchestrator Administrator password to login as.",
             "Type": "String",
             "NoEcho": "true",
             "Default": "123456@4dmin"
         }, 
         "AdminPassword": {
-            "Description": "Windows Administrator password to login as",
+            "Description": "Windows Administrator password to login as.",
             "Type": "String",
             "NoEcho": "true",
             "Default": "Q123!w3s0m3Orch35tr4t0r"
@@ -958,7 +973,7 @@
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Description": "S3 bucket name hosting the Quickstart templates.",
             "Type": "String",
             "Default": "aws-partner-quickstart"
         },
@@ -966,7 +981,7 @@
             "AllowedPattern": "^[0-9a-zA-Z-]*$",
             "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, and hyphens (-).",
             "Default": "templates",
-            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, and hyphens (-).",
+            "Description": "S3 key prefix under which Quick Start templates are hosted.",
             "Type": "String"
         }
     },
@@ -1103,8 +1118,8 @@
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
                     "Domain": {"Ref": "Domain"},
-                    "SubDomain": {"Ref": "SubDomain"},
-                    "ValidationDomain": {"Ref": "ValidationDomain"}
+                    "AppSubDomain": {"Ref": "AppSubDomain"},
+                    "ValidationSubDomain": {"Ref": "ValidationSubDomain"}
                 }
             }
         },
