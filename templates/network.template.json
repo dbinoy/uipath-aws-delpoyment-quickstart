@@ -8,11 +8,10 @@
         },
         "NumberOfAZs": {
             "AllowedValues": [
-                "1",
                 "2",
                 "3"
             ],
-            "Default": "1",
+            "Default": "2",
             "Description": "Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.",
             "Type": "String"
         },          
@@ -770,7 +769,6 @@
             "Value": { "Ref": "PrivateSubnet3" }
         },
         "PrivateSubnetIDs": {
-            "Condition": "3AZCondition",
             "Description": "Private subnet IDs in all Availability Zones",
             "Value": {"Fn::Join": [",", [
                                             {"Ref": "PrivateSubnet1"}, 
@@ -794,7 +792,6 @@
             "Value": { "Ref": "PublicSubnet3" }
         },
         "PublicSubnetIDs": {
-            "Condition": "3AZCondition",
             "Description": "Public subnet IDs in all Availability Zones",
             "Value": {"Fn::Join": [",", [
                                             {"Ref": "PublicSubnet1"}, 

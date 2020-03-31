@@ -201,7 +201,36 @@
 										"ec2:DeleteSnapshot"
 									],
 									"Resource": "*"
-								}								
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                },
+								{
+									"Effect": "Allow",
+									"Action": [
+                                        "acm:DeleteCertificate",
+                                        "acm:DescribeCertificate",
+                                        "acm:RequestCertificate",
+                                        "acm:GetCertificate",
+                                        "acm:ListCertificates",
+                                        "acm:ImportCertificate",
+                                        "acm:RenewCertificate"
+									],
+									"Resource": "*"
+                                },                                
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "xray:PutTraceSegments"
+                                    ],
+                                    "Resource": "*"
+                                }                                								
                             ]
                         }
                     }
