@@ -292,7 +292,7 @@
         "GatewayName": {
             "Description": "Name of S3 File Storage Gateway.",
             "Type": "String",
-            "Default": "UipathGateway"            
+            "Default": "uipathgateway"            
         },
         "GatewayTimezone": {
             "Description": "Timezone to choose for File Gateway",

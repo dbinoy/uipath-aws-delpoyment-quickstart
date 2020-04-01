@@ -23,7 +23,7 @@
             "Type": "String"
         },
         "GatewayName": {
-            "Description": "SName of Stirage Gateway",
+            "Description": "Name of Storage Gateway",
             "Type": "String"            
         },        
         "GatewayTimezone": {
@@ -119,6 +119,99 @@
                 "Tenancy" : "default"
             }
         },
+        "ActivationKeyFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description" : "Activates a Storage Gateway",
+                "Handler": "index.handler",
+                "Role": {"Ref" : "CustomLambdaRoleArn"},
+                "Code": {
+                    "ZipFile" : { "Fn::Join" : ["\n", [
+                        "import time",
+                        "import json",
+                        "import boto3",
+                        "import shlex",
+                        "import subprocess",
+                        "import cfnresponse",
+                        "ec2 = boto3.client('ec2')",
+                        "def create(properties, physical_id):",
+                        "    instanceId = properties['InstanceId']",
+                        "    instanceIP = properties['InstanceIP']",
+                        "    instanceRegion = properties['InstanceRegion']",
+                        "    instancestatuses = ec2.describe_instance_status(InstanceIds=[instanceId])['InstanceStatuses']",
+                        "        while len(instancestatuses) <= 0:",
+                        "            instancestatuses = ec2.describe_instance_status(InstanceIds=[instanceId])['InstanceStatuses']",
+                        "            print(f'Waiting for Instance-{instanceId} to be launched ...')",
+                        "            time.sleep(10)",
+                        "    instancedetails = instancestatuses[0]['InstanceStatus']['Details'][0]['Status']",
+                        "    systemstatus = instancestatuses[0]['SystemStatus']['Status']",
+                        "    while instancedetails != 'passed' and systemstatus != 'ok':",
+                        "        instancestatuses = ec2.describe_instance_status(InstanceIds=[instanceId])['InstanceStatuses']",
+                        "        instancedetails = instancestatuses[0]['InstanceStatus']['Details'][0]['Status']",
+                        "        systemstatus = instancestatuses[0]['SystemStatus']['Status']",
+                        "        print(f'Waiting for Instance-{instanceId} to pass status check ...')",
+                        "        time.sleep(30)",
+                        "    print('Retrieving activation key ...')",
+                        "    cmd = f\"wget '{instanceIP}/?activationRegion={instanceRegion}'\"",
+                        "    command = shlex.split(cmd)",
+                        "    activationKey=''",
+                        "    try:",
+                        "        output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode()",
+                        "        activationKey = output[output.find('activationKey=')+14:output.find('activationKey=')+43]",
+                        "    except subprocess.CalledProcessError as e:",
+                        "        output = e.output.decode()",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['Key'] = activationKey",
+                        "    returnAttribute['Action'] = 'CREATE'",
+                        "    return cfnresponse.SUCCESS, activationKey, returnAttribute",
+                        "def update(properties, physical_id):",
+                        "    activationKey = physical_id",
+                        "    gatewayName = properties['GatewayName']",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['Key'] = activationKey",                                                                 
+                        "    returnAttribute['Action'] = 'UPDATE'",
+                        "    return cfnresponse.SUCCESS, activationKey, returnAttribute",
+                        "def delete(properties, physical_id):",
+                        "    activationKey = physical_id",                      
+                        "    returnAttribute = {}",
+                        "    returnAttribute['Key'] = activationKey",
+                        "    returnAttribute['Action'] = 'DELETE'",
+                        "    return cfnresponse.SUCCESS, activationKey, returnAttribute",
+                        "def handler(event, context):",
+                        "    status = cfnresponse.FAILED",
+                        "    new_physical_id = None",
+                        "    returnAttribute = {}",
+                        "    try:",
+                        "        properties = event.get('ResourceProperties')",
+                        "        physical_id = event.get('PhysicalResourceId')",
+                        "        status, new_physical_id, returnAttribute = {",
+                        "            'Create': create,",
+                        "            'Update': update,",
+                        "            'Delete': delete",
+                        "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
+                        "    except Exception as e:",
+                        "        print('Exception: ' + str(e))",
+                        "        status = cfnresponse.FAILED",
+                        "    finally:",
+                        "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
+                    ]]}
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30,
+                "TracingConfig": {
+                    "Mode": "Active"
+                }
+            }
+        },        
+		"ActivationKey": {
+            "Type": "Custom::ActivationKey",
+            "Properties": {
+                    "ServiceToken": { "Fn::GetAtt" : ["ActivationKeyFunction", "Arn"] },
+                    "InstanceId": { "Ref" : "Gateway" },
+                    "InstanceIP": {  "Fn::GetAtt": [ "Gateway", "PublicIp" ] },
+                    "InstanceRegion": { "Ref" : "AWS::Region" }
+            }
+        },        
         "ActivateGatewayFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -135,23 +228,14 @@
                         "import cfnresponse",
                         "from datetime import datetime",
                         "from dateutil import tz",
-                        "ec2 = boto3.client('ec2')",
                         "gatewayClient = boto3.client('storagegateway')",
                         "def create(properties, physical_id):",
-                        "    instanceIP = properties['InstanceIP']",
+                        "    activationKey = properties['ActivationKey']",
                         "    instanceRegion = properties['InstanceRegion']",
                         "    gatewayName = properties['GatewayName']",
                         "    gatewayTimezone = properties['GatewayTimezone']",
                         "    zone=datetime.now(tz.gettz(gatewayTimezone)).strftime('%z')",
                         "    gatewayTimezoneOffset = f'{zone[0:3]}:{zone[3:5]}'",
-                        "    cmd = f\"wget '{instanceIP}/?activationRegion={instanceRegion}'\"",
-                        "    command = shlex.split(cmd)",
-                        "    activationKey=''",
-                        "    try:",
-                        "        output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode()",
-                        "        activationKey = output[output.find('activationKey=')+14:output.find('activationKey=')+43]",
-                        "    except subprocess.CalledProcessError as e:",
-                        "        output = e.output.decode()",
                         "    gatewayARN = gatewayClient.activate_gateway(",
                         "        ActivationKey=activationKey,",
                         "        GatewayName=gatewayName,",
@@ -222,7 +306,7 @@
             "Type": "Custom::StorageGateway",
             "Properties": {
                     "ServiceToken": { "Fn::GetAtt" : ["ActivateGatewayFunction", "Arn"] },
-                    "InstanceIP": {  "Fn::GetAtt": [ "Gateway", "PublicIp" ] },
+                    "ActivationKey": { "Ref" : "ActivationKey" },
                     "InstanceRegion": { "Ref" : "AWS::Region" },
                     "GatewayName": {"Ref" : "GatewayName"},
                     "GatewayTimezone": {"Ref" : "GatewayTimezone"}
