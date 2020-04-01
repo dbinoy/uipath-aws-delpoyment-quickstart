@@ -1037,6 +1037,7 @@
                     "ZipFile" : { "Fn::Join" : ["\n", [
                         "import boto3",
                         "import json",
+                        "import cfnresponse",
                         "def create(properties, physical_id):",
                         "    regionName = properties['RegionName']",
                         "    imageName = properties['ImageName']",
@@ -1078,6 +1079,7 @@
                         "    print('Received event: ' + json.dumps(event))",
                         "    status = cfnresponse.FAILED",
                         "    new_physical_id = None",
+                        "    returnAttribute = {}",
                         "    try:",
                         "        properties = event.get('ResourceProperties')",
                         "        physical_id = event.get('PhysicalResourceId')",

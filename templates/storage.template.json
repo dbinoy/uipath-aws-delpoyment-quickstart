@@ -213,6 +213,7 @@
                         "def handler(event, context):",
                         "    status = cfnresponse.FAILED",
                         "    new_physical_id = None",
+                        "    returnAttribute = {}",
                         "    try:",
                         "        properties = event.get('ResourceProperties')",
                         "        physical_id = event.get('PhysicalResourceId')",

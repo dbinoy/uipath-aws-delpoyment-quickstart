@@ -120,6 +120,7 @@
                     "ZipFile" : { "Fn::Join" : ["\n", [
                         "import json",
                         "import boto3",
+                        "import time",
                         "import cfnresponse",
                         "acm = boto3.client('acm')",
                         "gatewayClient = boto3.client('storagegateway')",
@@ -130,7 +131,8 @@
                         "        ValidationMethod='DNS'",
                         "    )",
                         "    certificateArn = certResponse['CertificateArn']",
-                        "    print(f'certificateArn = {certificateArn}')",                        
+                        "    print(f'certificateArn = {certificateArn}')",    
+                        "    time.sleep(5)",
                         "    certificateDetails = acm.describe_certificate(",
                         "        CertificateArn=certificateArn",
                         "    )",
@@ -191,7 +193,8 @@
                 "HostedZoneId" : {"Ref" : "HostedZone"},
                 "Name" : {"Fn::GetAtt" : ["AWSCertificate", "RecordName"]},
                 "Type" : {"Fn::GetAtt" : ["AWSCertificate", "RecordType"]},                
-                "ResourceRecords" : [ {"Fn::GetAtt" : ["AWSCertificate", "RecordValue"]} ]
+                "ResourceRecords" : [ {"Fn::GetAtt" : ["AWSCertificate", "RecordValue"]} ],
+                "TTL": "60"
             }
         },             
         "HttpListener": {
