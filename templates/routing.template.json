@@ -153,7 +153,7 @@
                         "    return cfnresponse.SUCCESS, certificateArn, returnAttribute",                       
                         "def delete(properties, physical_id):",
                         "    certificateArn = physical_id",
-                        "    returnAttribute['Action'] = DELETE",
+                        "    returnAttribute['Action'] = 'DELETE'",
                         "    return cfnresponse.SUCCESS, certificateArn, {}", 
                         "def handler(event, context):",
                         "    status = cfnresponse.FAILED",

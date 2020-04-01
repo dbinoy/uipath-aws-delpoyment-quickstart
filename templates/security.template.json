@@ -197,7 +197,8 @@
 									"Effect": "Allow",
 									"Action": [
 										"ec2:DescribeSnapshots",
-                                        "ec2:DescribeImages"
+                                        "ec2:DescribeImages",
+                                        "ec2:DescribeInstanceStatus"
 									],
 									"Resource": "*"
                                 },
