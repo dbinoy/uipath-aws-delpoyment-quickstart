@@ -14,12 +14,15 @@
             "Type": "String"
         },          
         "Domain": {
-            "Description": "Fully Qualified Domain Name for hosting",
+            "Description": "The domain to use to host the project. This should already exist as a hosted zone in Route 53.",
             "Type": "String",
-            "AllowedPattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.){2,}([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]){2,}$",
-            "Default": "www.uipath-orchestrator-quickstart.com",
-            "ConstraintDescription" : "Should be a fully qualified domain name"
+            "Default": "corp.com"
         },
+        "SubDomain": {
+            "Description": "Application subdomain under the parent domain where the delpoyed app would be accessible.",
+            "Type": "String",
+            "Default": "app"
+        },        
         "CustomLambdaRoleArn": {
             "Description": "ARN for IAM Role to be assumed by Lambda functinos creating Storage Gateway custom resources",
             "Type": "String"
@@ -150,7 +153,23 @@
                         "    returnAttribute['RecordValue'] = acmRecordValue",
                         "    returnAttribute['RecordType'] = acmRecordType",                        
                         "    returnAttribute['Action'] = 'CREATE'",
-                        "    return cfnresponse.SUCCESS, certificateArn, returnAttribute",                       
+                        "    return cfnresponse.SUCCESS, certificateArn, returnAttribute",  
+                        "def update(properties, physical_id):",
+                        "    certificateArn = physical_id",
+                        "    certificateDetails = acm.describe_certificate(",
+                        "        CertificateArn=certificateArn",
+                        "    )",
+                        "    acmDomainName = certificateDetails['Certificate']['DomainName']",
+                        "    acmRecordName = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Name']",
+                        "    acmRecordValue = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Value']",
+                        "    acmRecordType = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Type']",    
+                        "    returnAttribute = {}",
+                        "    returnAttribute['DomainName'] = acmDomainName",
+                        "    returnAttribute['RecordName'] = acmRecordName",
+                        "    returnAttribute['RecordValue'] = acmRecordValue",
+                        "    returnAttribute['RecordType'] = acmRecordType",                                              
+                        "    returnAttribute['Action'] = 'UPDATE'",
+                        "    return cfnresponse.SUCCESS, certificateArn, returnAttribute",  
                         "def delete(properties, physical_id):",
                         "    certificateArn = physical_id",
                         "    returnAttribute['Action'] = 'DELETE'",
@@ -181,23 +200,132 @@
                 }
             }
         },    
-		"AWSCertificate": {
-            "Type": "Custom::AWSCertificate",
+		"RequestedAWSCertificate": {
+            "Type": "Custom::RequestedAWSCertificate",
             "Properties": {
                     "ServiceToken": { "Fn::GetAtt" : ["RequestAWSCertificateFunction", "Arn"] },
                     "DomainName" : {"Ref": "Domain"}
             }
-        },       
-        "CertificateValidationRecordSet": {
-            "Type" : "AWS::Route53::RecordSet",
-            "Properties" : {
-                "HostedZoneId" : {"Ref" : "HostedZone"},
-                "Name" : {"Fn::GetAtt" : ["AWSCertificate", "RecordName"]},
-                "Type" : {"Fn::GetAtt" : ["AWSCertificate", "RecordType"]},                
-                "ResourceRecords" : [ {"Fn::GetAtt" : ["AWSCertificate", "RecordValue"]} ],
-                "TTL": "60"
+        },  
+        "ValidateAWSCertificateFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description" : "Performs DNS based validation of issued ACM certificate",
+                "Handler": "index.handler",
+                "Role": {"Ref" : "CustomLambdaRoleArn"},
+                "Code": {
+                    "ZipFile" : { "Fn::Join" : ["\n", [
+                        "import json",
+                        "import boto3",
+                        "import time",
+                        "import cfnresponse",
+                        "route53 = boto3.client('route53')",
+                        "acm = boto3.client('acm')",
+                        "gatewayClient = boto3.client('storagegateway')",
+                        "def create(properties, physical_id):",
+                        "    hostedZoneId = properties['HostedZoneId']",
+                        "    recordName = properties['RecordName']",
+                        "    recordValue = properties['RecordValue']",
+                        "    recordType = properties['RecordType']",
+                        "    certificateArn = properties['CertificateArn']",
+                        "    ttl = int(properties['TTL'])",
+                        "    changeResponse = route53.change_resource_record_sets(",
+                        "        HostedZoneId = hostedZoneId,",
+                        "        ChangeBatch = {",
+                        "            'Changes': [{",
+                        "                'Action': 'UPSERT',",
+                        "                'ResourceRecordSet': {",
+                        "                    'Name': recordName,",
+                        "                    'Type': recordType,",
+                        "                    'TTL': ttl,",
+                        "                    'ResourceRecords': [{'Value': recordValue}]",
+                        "                }",
+                        "            }]",
+                        "        }",
+                        "    )",
+                        "    print(f'{recordType} Upsert record for Hosted zone {hostedZoneId} submitted : {changeResponse[\"ChangeInfo\"][\"Id\"]}, Status: {changeResponse[\"ChangeInfo\"][\"Status\"]}')",                        
+                        "    certificateDetails = acm.describe_certificate(",
+                        "        CertificateArn=certificateArn",
+                        "    )",
+                        "    status = certificateDetails['Certificate']['Status']",
+                        "    while status != 'ISSUED':",
+                        "        sleep(10)",
+                        "        certificateDetails = acm.describe_certificate(",
+                        "            CertificateArn=certificateArn",
+                        "        )",
+                        "        status = certificateDetails['Certificate']['Status']",
+                        "        if status != 'ISSUED':",                        
+                        "            print(status)",
+                        "    print(f'Certifcate {certificateArn} Validated.')",
+                        "    acmDomainName = certificateDetails['Certificate']['DomainName']",
+                        "    acmRecordName = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Name']",
+                        "    acmRecordValue = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Value']",
+                        "    acmRecordType = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Type']",
+                        "    returnAttribute = {}",
+                        "    returnAttribute['DomainName'] = acmDomainName",
+                        "    returnAttribute['RecordName'] = acmRecordName",
+                        "    returnAttribute['RecordValue'] = acmRecordValue",
+                        "    returnAttribute['RecordType'] = acmRecordType",                        
+                        "    returnAttribute['Action'] = 'CREATE'",
+                        "    return cfnresponse.SUCCESS, certificateArn, returnAttribute",  
+                        "def update(properties, physical_id):",
+                        "    certificateArn = physical_id",
+                        "    certificateDetails = acm.describe_certificate(",
+                        "        CertificateArn=certificateArn",
+                        "    )",
+                        "    acmDomainName = certificateDetails['Certificate']['DomainName']",
+                        "    acmRecordName = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Name']",
+                        "    acmRecordValue = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Value']",
+                        "    acmRecordType = certificateDetails['Certificate']['DomainValidationOptions'][0]['ResourceRecord']['Type']",    
+                        "    returnAttribute = {}",
+                        "    returnAttribute['DomainName'] = acmDomainName",
+                        "    returnAttribute['RecordName'] = acmRecordName",
+                        "    returnAttribute['RecordValue'] = acmRecordValue",
+                        "    returnAttribute['RecordType'] = acmRecordType",                                              
+                        "    returnAttribute['Action'] = 'UPDATE'",
+                        "    return cfnresponse.SUCCESS, certificateArn, returnAttribute",  
+                        "def delete(properties, physical_id):",
+                        "    certificateArn = physical_id",
+                        "    returnAttribute['Action'] = 'DELETE'",
+                        "    return cfnresponse.SUCCESS, certificateArn, {}", 
+                        "def handler(event, context):",
+                        "    status = cfnresponse.FAILED",
+                        "    new_physical_id = None",
+                        "    returnAttribute = {}",
+                        "    try:",
+                        "        properties = event.get('ResourceProperties')",
+                        "        physical_id = event.get('PhysicalResourceId')",
+                        "        status, new_physical_id, returnAttribute = {",
+                        "            'Create': create,",
+                        "            'Update': create,",
+                        "            'Delete': delete",
+                        "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
+                        "    except Exception as e:",
+                        "        print('Exception: ' + e)",
+                        "        status = cfnresponse.FAILED",
+                        "    finally:",
+                        "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
+                    ]]}
+                },
+                "Runtime": "python3.6",
+                "Timeout": 30,
+                "TracingConfig": {
+                    "Mode": "Active"
+                }
             }
-        },             
+        },                
+		"ValidatedAWSCertificate": {
+            "Type": "Custom::ValidatedAWSCertificate",
+            "Properties": {
+                    "ServiceToken": { "Fn::GetAtt" : ["ValidateAWSCertificateFunction", "Arn"] },
+                    "HostedZoneId" : {"Ref": "HostedZone"},
+                    "CertificateArn" : {"Ref": "RequestedAWSCertificate"},
+                    "RecordName" : {"Fn::GetAtt" : ["RequestedAWSCertificate", "RecordName"]},
+                    "RecordType" : {"Fn::GetAtt" : ["RequestedAWSCertificate", "RecordType"]},                
+                    "RecordValue" : [ {"Fn::GetAtt" : ["RequestedAWSCertificate", "RecordValue"]} ],
+                    "TTL": "30"
+            }
+        },                      
         "HttpListener": {
             "Type" : "AWS::ElasticLoadBalancingV2::Listener",
             "Properties" : {
@@ -216,13 +344,32 @@
                 ]
             }
         }, 
+        "HttpsListener": {
+            "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties" : {
+                "LoadBalancerArn" : {"Ref": "ApplicationLoadBalancer"},
+                "Port" : 443,
+                "Protocol" : "HTTPS",                
+                "DefaultActions" : [ 
+                    {
+                        "Type" : "forward",
+                        "TargetGroupArn" : {"Ref": "TargetGroup"}                  
+                    } 
+                ],
+                "SslPolicy": "ELBSecurityPolicy-2016-08",
+                "Certificates" : [ 
+                    {
+                        "CertificateArn" : {"Ref": "ValidatedAWSCertificate"}
+                    } 
+                ]
+            }
+        },        
         "RecordSet": {
             "Type" : "AWS::Route53::RecordSet",
             "Properties" : {
                 "HostedZoneId" : {"Ref" : "HostedZone"},
-                "Name" : {"Ref": "Domain"},
-                "Type" : "A",
-                
+                "Name" : { "Fn::Join" : [" ", [{"Ref": "SubDomain"}, {"Ref": "Domain"}]]},
+                "Type" : "A",                
                 "AliasTarget" : {
                     "EvaluateTargetHealth" : false,
                     "DNSName" : {"Fn::GetAtt" : ["ApplicationLoadBalancer", "DNSName"]},                    

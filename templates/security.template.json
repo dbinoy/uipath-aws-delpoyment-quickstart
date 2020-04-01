@@ -223,7 +223,14 @@
                                         "acm:RenewCertificate"
 									],
 									"Resource": "*"
-                                },                                
+                                },
+								{
+									"Effect": "Allow",
+									"Action": [
+                                        "route53:ChangeResourceRecordSets"
+									],
+									"Resource": "*"
+                                },                                                                
                                 {
                                     "Effect": "Allow",
                                     "Action": [

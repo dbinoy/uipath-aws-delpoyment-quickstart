@@ -144,7 +144,7 @@
                         "        time.sleep(10)",
                         "    instancedetails = instancestatuses[0]['InstanceStatus']['Details'][0]['Status']",
                         "    systemstatus = instancestatuses[0]['SystemStatus']['Status']",
-                        "    while instancedetails != 'passed' and systemstatus != 'ok':",˜
+                        "    while instancedetails != 'passed' and systemstatus != 'ok':",
                         "        instancestatuses = ec2.describe_instance_status(InstanceIds=[instanceId])['InstanceStatuses']",
                         "        instancedetails = instancestatuses[0]['InstanceStatus']['Details'][0]['Status']",
                         "        systemstatus = instancestatuses[0]['SystemStatus']['Status']",
