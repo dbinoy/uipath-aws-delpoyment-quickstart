@@ -215,27 +215,7 @@
                     } 
                 ]
             }
-        },
-        "HttpsListener": {
-            "Type" : "AWS::ElasticLoadBalancingV2::Listener",
-            "Properties" : {
-                "LoadBalancerArn" : {"Ref": "ApplicationLoadBalancer"},
-                "Port" : 443,
-                "Protocol" : "HTTPS",                
-                "DefaultActions" : [ 
-                    {
-                        "Type" : "forward",
-                        "TargetGroupArn" : {"Ref": "TargetGroup"}                  
-                    } 
-                ],
-                "SslPolicy": "ELBSecurityPolicy-2016-08",
-                "Certificates" : [ 
-                    {
-                        "CertificateArn" : {"Ref": "AWSCertificate"}
-                    } 
-                ]
-            }
-        },        
+        }, 
         "RecordSet": {
             "Type" : "AWS::Route53::RecordSet",
             "Properties" : {
