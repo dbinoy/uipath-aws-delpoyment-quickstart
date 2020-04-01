@@ -205,7 +205,7 @@
                         "            'Delete': delete",
                         "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
                         "    except Exception as e:",
-                        "        print('Exception: ' + e)",
+                        "        print('Exception: ' + str(e))",
                         "        status = cfnresponse.FAILED",
                         "    finally:",
                         "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
@@ -291,7 +291,7 @@
                         "            'Delete': delete",
                         "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
                         "    except Exception as e:",
-                        "        print('Exception: ' + e)",
+                        "        print('Exception: ' + str(e))",
                         "        status = cfnresponse.FAILED",
                         "    finally:",
                         "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
@@ -378,7 +378,7 @@
                         "            'Delete': delete",
                         "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
                         "    except Exception as e:",
-                        "        print('Exception: ' + e)",
+                        "        print('Exception: ' + str(e))",
                         "        status = cfnresponse.FAILED",
                         "    finally:",
                         "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
