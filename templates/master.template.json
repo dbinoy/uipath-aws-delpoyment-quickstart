@@ -1022,7 +1022,8 @@
                                     {"Ref": "QSS3KeyPrefix"}, "security.template.json" ]]},
                 "Parameters" : {
                     "VPCID": { "Fn::GetAtt" : ["NetworkStack", "Outputs.VPCID"] },
-                    "VPCCIDR": {"Ref": "VPCCIDR"}                                      
+                    "VPCCIDR": {"Ref": "VPCCIDR"},
+                    "StorageBucket": {"Ref": "StorageBucket"}                                      
                 }
             }
         },
@@ -1110,7 +1111,7 @@
                                     {"Fn::Join": [".", [ {"Ref": "QSS3BucketName"}, "s3", {"Ref": "AWS::Region"}, "amazonaws", "com" ]]},
                                     {"Ref": "QSS3KeyPrefix"}, "storage.template.json" ]]},
                 "Parameters" : {
-                    "StorageBucket": {"Ref": "StorageBucket"},
+                    "StorageBucketARN": { "Fn::GetAtt" : ["SecurityStack", "Outputs.StorageBucketARN"] },
                     "SubnetIDs": { "Fn::GetAtt" : ["NetworkStack", "Outputs.PublicSubnetIDs"] },
                     "GatewaySecurityGroup": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
                     "FileShareIAMRole": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMRole"] },
@@ -1234,6 +1235,13 @@
                 "Name": { "Fn::Sub": "${AWS::StackName}-S3VPCEndpoint" }
             }
         },
+        "StorageBucketARN": {
+            "Description": "Storage Bucket ARN",
+            "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.StorageBucketARN"] },
+            "Export": {
+                "Name": { "Fn::Sub": "${AWS::StackName}-StorageBucketARN" }
+            }
+        },        
         "SecurityGroup": {
             "Description": "Security Group allowing access to WindowsRM from anywhere",
             "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.SecurityGroup"] },
@@ -1253,13 +1261,6 @@
             "Value": { "Fn::GetAtt" : ["SecurityStack", "Outputs.FileShareIAMPolicy"] },
             "Export": {
                 "Name": { "Fn::Sub": "${AWS::StackName}-FileShareIAMPolicy" }
-            }
-        },
-        "StorageBucketARN": {
-            "Description": "Storage Bucket ARN",
-            "Value": { "Fn::GetAtt" : ["StorageStack", "Outputs.StorageBucketARN"] },
-            "Export": {
-                "Name": { "Fn::Sub": "${AWS::StackName}-StorageBucketARN" }
             }
         },
         "GatewayVMID1": {
