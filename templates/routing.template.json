@@ -187,7 +187,7 @@
                         "            'Delete': delete",
                         "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
                         "    except Exception as e:",
-                        "        print('Exception: ' + e)",
+                        "        print('Exception: ' + str(e))",
                         "        status = cfnresponse.FAILED",
                         "    finally:",
                         "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
@@ -301,7 +301,7 @@
                         "            'Delete': delete",
                         "        }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)",
                         "    except Exception as e:",
-                        "        print('Exception: ' + e)",
+                        "        print('Exception: ' + (e))",
                         "        status = cfnresponse.FAILED",
                         "    finally:",
                         "        cfnresponse.send(event, context, status, returnAttribute, new_physical_id)"
@@ -396,13 +396,9 @@
             "Description": "Route53 Hosted Zone ID"
         },        
         "AWSCertificate": {
-            "Value":  {"Ref" : "AWSCertificate"},
+            "Value":  {"Ref" : "ValidatedAWSCertificate"},
             "Description": "AWS Certificate Manager Certificate Resource"
-        },
-        "CertificateValidationRecordSet": {
-            "Value":  {"Ref" : "CertificateValidationRecordSet"},
-            "Description": "Route53 CNAME Record"
-        },         
+        },      
         "HttpListener": {
             "Value":  {"Ref" : "HttpListener"},
             "Description": "HTTP Listener ARN"
