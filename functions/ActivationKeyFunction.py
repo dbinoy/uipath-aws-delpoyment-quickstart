@@ -3,7 +3,6 @@ import time
 import json
 import boto3
 import cfnresponse
-import urllib.request
 ec2 = boto3.client('ec2')
 def create(properties, physical_id):
     instanceId = properties['InstanceId']
@@ -26,12 +25,12 @@ def create(properties, physical_id):
     activationKey = ''
     url = 'redirect_url=$(curl -f -s -S -w \'%%{redirect_url}\' "http://%s/?activationRegion=%s")  && echo $redirect_url' % (instanceIP,instanceRegion)
     redirect_url = os.popen(url).read()
-    if redirect_url == "" or redirect_url is None:
-        raise Exception("No redirect url returned for ip: %s" % instanceIP)
-    activationKey = redirect_url.split("activationKey=")[1].split("&gateway")[0]
-    if activationKey is None or activationKey is "":
-        raise Exception("Unable to extract the key from the returned redirect url: %s" %redirect_url)
-    print(f'Actiavtion Key = {activationKey}')
+    if redirect_url == '' or redirect_url is None:
+        raise Exception(f'No redirect url returned for ip: {instanceIP}')
+    activationKey = redirect_url[redirect_url.find('activationKey=')+14:len(redirect_url)-1]
+    if activationKey is None or activationKey is '':
+        raise Exception(f'Unable to extract the key from the returned redirect url: {redirect_url}')
+    print(f'Actiavtion Key = "{activationKey}"')
     returnAttribute = {}
     returnAttribute['Key'] = activationKey
     returnAttribute['Action'] = 'CREATE'
@@ -40,16 +39,17 @@ def update(properties, physical_id):
     activationKey = physical_id
     gatewayName = properties['GatewayName']
     returnAttribute = {}
-    returnAttribute['Key'] = activationKey
+    returnAttribute['Key'] = activationKey                                                                 
     returnAttribute['Action'] = 'UPDATE'
     return cfnresponse.SUCCESS, activationKey, returnAttribute
 def delete(properties, physical_id):
-    activationKey = physical_id
+    activationKey = physical_id                      
     returnAttribute = {}
     returnAttribute['Key'] = activationKey
     returnAttribute['Action'] = 'DELETE'
     return cfnresponse.SUCCESS, activationKey, returnAttribute
 def handler(event, context):
+    print('Received event: ' + json.dumps(event))
     status = cfnresponse.FAILED
     new_physical_id = None
     returnAttribute = {}
