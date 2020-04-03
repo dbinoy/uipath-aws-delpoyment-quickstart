@@ -104,15 +104,6 @@
                 "HealthCheckProtocol" : "HTTP"
             }
         },
-        "HostedZone": {
-            "Type" : "AWS::Route53::HostedZone",
-            "Properties" : {
-                "Name" : {"Ref": "Domain"},
-                "HostedZoneConfig" : {
-                    "Comment": { "Fn::Join" : [" ", ["Hosted Zone for", {"Ref": "Domain"}]]}
-                }
-            }
-        },
         "RequestAWSCertificateFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -217,6 +208,16 @@
                     "DomainName" : {"Ref": "Domain"}
             }
         },  
+        "HostedZone": {
+            "Type" : "AWS::Route53::HostedZone",
+            "DependsOn": "RequestedAWSCertificate",
+            "Properties" : {
+                "Name" : {"Ref": "Domain"},
+                "HostedZoneConfig" : {
+                    "Comment": { "Fn::Join" : [" ", ["Hosted Zone for", {"Ref": "Domain"}]]}
+                }
+            }
+        },        
         "ValidateAWSCertificateFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
